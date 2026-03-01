@@ -1,0 +1,31 @@
+.title {
+  font-family: 'Courier New', monospace;
+  font-size: 96px;
+  color: white;
+  text-align: center;
+  animation: blink 1.4s infinite;
+
+  /* pixel look */
+  image-rendering: pixelated;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: grayscale;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.subtitle {
+  font-family: 'Courier New', monospace;
+  font-size: 48px;
+  color: #ffcc66;
+  text-align: center;
+  margin-top: -10px;
+
+  image-rendering: pixelated;
+  -webkit-font-smoothing: none;
+  text-shadow: 2px 2px 0 #000;
+}
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
