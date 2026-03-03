@@ -1,4 +1,12 @@
-export function Player({ x, y, scale, facing }) {
+type PlayerProps = {
+  x: number;
+  y: number;
+  scale: number;
+  facing: "left" | "right";
+  isWalking: boolean;
+};
+
+export function Player({ x, y, scale, facing }: PlayerProps) {
   return (
     <div
       style={{

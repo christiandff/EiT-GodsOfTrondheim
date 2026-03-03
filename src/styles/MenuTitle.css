@@ -1,31 +1,254 @@
-.title {
-  font-family: 'Courier New', monospace;
-  font-size: 96px;
-  color: white;
-  text-align: center;
-  animation: blink 1.4s infinite;
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
 
-  /* pixel look */
-  image-rendering: pixelated;
-  -webkit-font-smoothing: none;
-  -moz-osx-font-smoothing: grayscale;
-  text-shadow: 2px 2px 0 #000;
+/* ─── Root ─────────────────────────────────────────────── */
+.menu-root {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, #0a0a1a 0%, #0d1a2e 50%, #0a0a1a 100%);
+  overflow: hidden;
+  z-index: 20;
 }
 
-.subtitle {
-  font-family: 'Courier New', monospace;
-  font-size: 48px;
-  color: #ffcc66;
-  text-align: center;
-  margin-top: -10px;
-
-  image-rendering: pixelated;
-  -webkit-font-smoothing: none;
-  text-shadow: 2px 2px 0 #000;
+/* ─── Scanlines ─────────────────────────────────────────── */
+.scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    rgba(0, 0, 0, 0.18) 3px,
+    rgba(0, 0, 0, 0.18) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
 }
 
-@keyframes blink {
-  0% { opacity: 1; }
-  50% { opacity: 0.4; }
+/* ─── Stars ─────────────────────────────────────────────── */
+.stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.star {
+  position: absolute;
+  background: #fff;
+  border-radius: 0;
+  animation: twinkle 2.5s infinite alternate;
+  image-rendering: pixelated;
+}
+
+@keyframes twinkle {
+  0%   { opacity: 0.2; }
   100% { opacity: 1; }
+}
+
+/* ─── Content ────────────────────────────────────────────── */
+.menu-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.menu-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── Badge ──────────────────────────────────────────────── */
+.menu-badge {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: #ffcc44;
+  letter-spacing: 3px;
+  border: 2px solid #ffcc44;
+  padding: 6px 16px;
+  animation: badge-pulse 3s infinite;
+}
+
+@keyframes badge-pulse {
+  0%, 100% { box-shadow: 0 0 6px #ffcc44; }
+  50%       { box-shadow: 0 0 18px #ffcc44, 0 0 30px #ffcc4466; }
+}
+
+/* ─── Title block ────────────────────────────────────────── */
+.menu-title-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.menu-eyebrow {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: #8899bb;
+  letter-spacing: 4px;
+}
+
+.menu-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(28px, 5vw, 64px);
+  line-height: 1.1;
+  letter-spacing: 2px;
+  text-shadow: 4px 4px 0 #000, 6px 6px 0 rgba(0,0,0,0.4);
+}
+
+.title-gods {
+  color: #ffdd55;
+  animation: glow-gold 2s infinite alternate;
+}
+
+.title-of {
+  color: #ccddff;
+  font-size: 0.6em;
+  vertical-align: middle;
+  padding: 0 8px;
+}
+
+.title-trondheim {
+  color: #55aaff;
+  animation: glow-blue 2s infinite alternate;
+}
+
+@keyframes glow-gold {
+  from { text-shadow: 4px 4px 0 #000, 0 0 10px #ffaa0066; }
+  to   { text-shadow: 4px 4px 0 #000, 0 0 24px #ffaa00cc, 0 0 40px #ffaa0044; }
+}
+
+@keyframes glow-blue {
+  from { text-shadow: 4px 4px 0 #000, 0 0 10px #0066ff44; }
+  to   { text-shadow: 4px 4px 0 #000, 0 0 24px #2288ffcc, 0 0 40px #2288ff44; }
+}
+
+.menu-subtitle-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.line-decoration {
+  color: #334466;
+  font-size: 14px;
+  letter-spacing: -2px;
+}
+
+.menu-tagline {
+  font-family: 'VT323', monospace;
+  font-size: 22px;
+  color: #7799bb;
+  letter-spacing: 3px;
+}
+
+/* ─── Controls ───────────────────────────────────────────── */
+.menu-controls {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 12px 24px;
+  font-family: 'VT323', monospace;
+  font-size: 20px;
+  color: #7799bb;
+  letter-spacing: 2px;
+}
+
+.controls-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.controls-sep {
+  color: #334466;
+  margin: 0 4px;
+}
+
+kbd {
+  display: inline-block;
+  background: #1a2240;
+  border: 2px solid #334466;
+  color: #aabbdd;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  padding: 3px 7px;
+  margin: 0 2px;
+  box-shadow: 0 3px 0 #0a1020;
+  vertical-align: middle;
+}
+
+/* ─── Start button ───────────────────────────────────────── */
+.menu-start-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 18px;
+  color: #000;
+  background: #ffdd55;
+  border: none;
+  padding: 16px 40px;
+  cursor: pointer;
+  letter-spacing: 2px;
+  box-shadow: 6px 6px 0 #aa8800, 0 0 0 2px #000;
+  transition: transform 0.08s, box-shadow 0.08s;
+  image-rendering: pixelated;
+  animation: btn-appear 0.4s ease 0.4s both;
+}
+
+.menu-start-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 #aa8800, 0 0 0 2px #000, 0 0 20px #ffdd5566;
+}
+
+.menu-start-btn:active {
+  transform: translate(4px, 4px);
+  box-shadow: 2px 2px 0 #aa8800, 0 0 0 2px #000;
+}
+
+.btn-arrow {
+  margin-right: 10px;
+  animation: arrow-bounce 0.8s infinite alternate;
+  display: inline-block;
+}
+
+@keyframes arrow-bounce {
+  from { transform: translateX(0); }
+  to   { transform: translateX(4px); }
+}
+
+@keyframes btn-appear {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ─── Enter hint ─────────────────────────────────────────── */
+.menu-enter-hint {
+  font-family: 'VT323', monospace;
+  font-size: 18px;
+  color: #556677;
+  letter-spacing: 2px;
+  animation: blink-hint 1.6s infinite;
+}
+
+@keyframes blink-hint {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* ─── Version ────────────────────────────────────────────── */
+.menu-version {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: #2a3a55;
+  letter-spacing: 2px;
+  margin-top: 8px;
 }

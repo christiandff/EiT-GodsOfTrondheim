@@ -1,4 +1,8 @@
-export function KarmaBar({ karma }) {
+type KarmaBarProps = {
+  karma: number;
+};
+
+export function KarmaBar({ karma }: KarmaBarProps) {
   const maxKarma = 100;
   const percent = Math.min(karma, maxKarma);
 
@@ -15,7 +19,6 @@ export function KarmaBar({ karma }) {
         zIndex: 1000
       }}
     >
-      {/* Selve baren */}
       <div
         style={{
           width: 200,
@@ -38,7 +41,6 @@ export function KarmaBar({ karma }) {
         />
       </div>
 
-      {/* Pixelert tekst */}
       <div
         style={{
           color: "white",

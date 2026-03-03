@@ -1,39 +1,77 @@
+import { useEffect, useState } from "react";
 import "../styles/MenuTitle.css";
 
-
 export function MainMenu({ onStart }: { onStart: () => void }) {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setVisible(true), 100);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
-    <div
-      style={{
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        textAlign: "center",
-        color: "white",
-        zIndex: 20
-      }}
-    >
-      <div className="title">Eksperter i Team</div>
-      <div className="subtitle">GODS OF TRONDHEIM</div>
+    <div className="menu-root">
+      {/* Scanline overlay */}
+      <div className="scanlines" />
 
-      <button
-        onClick={onStart}
-        style={{
-          marginTop: "40px",
-          padding: "12px 24px",
-          fontSize: "20px",
-          background: "rgba(0,0,0,0.7)",
-          color: "white",
-          border: "2px solid white",
-          cursor: "pointer"
-        }}
-      >
-        Start Game
-      </button>
+      {/* Stars */}
+      <div className="stars">
+        {Array.from({ length: 60 }).map((_, i) => (
+          <div
+            key={i}
+            className="star"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              width: Math.random() > 0.8 ? 3 : 2,
+              height: Math.random() > 0.8 ? 3 : 2,
+            }}
+          />
+        ))}
+      </div>
 
-      <div style={{ marginTop: "20px", fontSize: "16px" }}>
-        Press ENTER to start
+      <div className={`menu-content ${visible ? "menu-visible" : ""}`}>
+        {/* Top badge */}
+        <div className="menu-badge">✦ EiT 2026 ✦</div>
+
+        {/* Title block */}
+        <div className="menu-title-block">
+          <div className="menu-eyebrow">EKSPERTER I TEAM PRESENTS</div>
+          <div className="menu-title">
+            <span className="title-gods">GODS</span>
+            <span className="title-of"> OF </span>
+            <span className="title-trondheim">TRONDHEIM</span>
+          </div>
+          <div className="menu-subtitle-line">
+            <span className="line-decoration">▓▓▓</span>
+            <span className="menu-tagline">A KARMIC JOURNEY THROUGH THE CITY</span>
+            <span className="line-decoration">▓▓▓</span>
+          </div>
+        </div>
+
+        {/* Controls hint */}
+        <div className="menu-controls">
+          <div className="controls-row">
+            <kbd>A</kbd><kbd>D</kbd> Move
+            <span className="controls-sep">·</span>
+            <kbd>SPACE</kbd> Jump
+            <span className="controls-sep">·</span>
+            <kbd>E</kbd> Interact
+            <span className="controls-sep">·</span>
+            <kbd>ESC</kbd> Pause
+          </div>
+        </div>
+
+        {/* Start button */}
+        <button className="menu-start-btn" onClick={onStart}>
+          <span className="btn-arrow">▶</span> START GAME
+        </button>
+
+        <div className="menu-enter-hint">— or press ENTER —</div>
+
+        {/* Version tag */}
+        <div className="menu-version">v1.0.0 · TRONDHEIM BUILD</div>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Player } from "./components/Player";
 import { Bus } from "./components/Bus";
 import { NPC } from "./components/NPC";
@@ -6,7 +6,10 @@ import { Dialog } from "./components/Dialog";
 import { MainMenu } from "./components/MainMenu";
 import { scenes } from "./scenes";
 import { KarmaBar } from "./components/KarmaBar";
+import { PauseMenu } from "./components/PauseMenu";
+import { BreathingMinigame } from "./components/BreathingMinigame";
 
+const MOVE_SPEED = 5; // px per frame
 
 export default function App() {
   const PLAYER_WIDTH = 48;
@@ -18,13 +21,20 @@ export default function App() {
 
   const [playerX, setPlayerX] = useState(200);
   const [playerY, setPlayerY] = useState(GROUND_Y);
-  const [velocityY, setVelocityY] = useState(0);
-
   const [facing, setFacing] = useState<"left" | "right">("right");
   const [isWalking, setIsWalking] = useState(false);
 
-  const [isPressingE, setIsPressingE] = useState(false);
+  // All held keys tracked as refs — never stale inside the game loop
+  const keysRef = useRef<Set<string>>(new Set());
+  const isPressingERef = useRef(false);
+  const velocityYRef = useRef(0);
+  const playerYRef = useRef(GROUND_Y);
+  const playerXRef = useRef(200);
+  const isTalkingRef = useRef(false);
+  const isPausedRef = useRef(false);
+
   const [isTalking, setIsTalking] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [questionSelected, setQuestionSelected] = useState<number | null>(null);
   const [npcResponse, setNpcResponse] = useState<string | null>(null);
 
@@ -32,129 +42,120 @@ export default function App() {
   const TEMPLE_DOOR_X = WORLD_WIDTH / 2;
   const NPC_X = 600;
 
-const [karma, setKarma] = useState(50); // startverdi
+  const [karma, setKarma] = useState(0);
+  const [showMinigame, setShowMinigame] = useState(false);
+
+  // Keep refs in sync with state
+  useEffect(() => { playerYRef.current = playerY; }, [playerY]);
+  useEffect(() => { playerXRef.current = playerX; }, [playerX]);
+  useEffect(() => { isTalkingRef.current = isTalking; }, [isTalking]);
+  useEffect(() => { isPausedRef.current = isPaused; }, [isPaused]);
 
   function startGame() {
     setCurrentScene(1);
     setPlayerX(200);
+    playerXRef.current = 200;
   }
 
   // ENTER to start
   useEffect(() => {
     function handleEnter(e: KeyboardEvent) {
-      if (currentScene === 0 && e.key === "Enter") {
-        startGame();
-      }
+      if (currentScene === 0 && e.key === "Enter") startGame();
     }
     window.addEventListener("keydown", handleEnter);
     return () => window.removeEventListener("keydown", handleEnter);
   }, [currentScene]);
 
-  // Register E
+  // ESC to pause/resume
   useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "e" || e.key === "E") setIsPressingE(true);
+    function handleEsc(e: KeyboardEvent) {
+      if (e.key === "Escape" && currentScene !== 0) {
+        setIsPaused(prev => !prev);
+      }
     }
-    function handleKeyUp(e: KeyboardEvent) {
-      if (e.key === "e" || e.key === "E") setIsPressingE(false);
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [currentScene]);
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      keysRef.current.add(e.key.toLowerCase());
+      if (e.key === "e" || e.key === "E") isPressingERef.current = true;
     }
-
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
+    function onKeyUp(e: KeyboardEvent) {
+      keysRef.current.delete(e.key.toLowerCase());
+      if (e.key === "e" || e.key === "E") isPressingERef.current = false;
+    }
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
     };
   }, []);
 
-  // Movement + direction + jump
+  // Jump on spacebar keydown (single press, not held)
   useEffect(() => {
     if (currentScene === 0) return;
-    if (isTalking) return;
-
-    function handleKey(e: KeyboardEvent) {
-      let moved = false;
-
-      setPlayerX(prev => {
-        let next = prev;
-
-        if (e.key === "d" || e.key === "D") {
-          next = prev + 10;
-          setFacing("right");
-          moved = true;
-        }
-        if (e.key === "a" || e.key === "A") {
-          next = prev - 10;
-          setFacing("left");
-          moved = true;
-        }
-
-        if (next < 0) next = 0;
-        if (next > WORLD_WIDTH - PLAYER_WIDTH) next = WORLD_WIDTH - PLAYER_WIDTH;
-
-        return next;
-      });
-
-      setIsWalking(moved);
-
-      // karma
-              if (
-          currentScene === 1 &&
-          Math.abs(playerX - NPC_X) < 80 &&
-          isPressingE &&
-          !isTalking
-        ) {
-          setIsTalking(true);
-          setQuestionSelected(null);
-          setNpcResponse(null);
-          setKarma(prev => Math.min(prev + 10, 100)); // øker karma
-        }
-
-
-      // Jump (positive = oppover)
-      if (e.key === " " && playerY === GROUND_Y) {
-        setVelocityY(18);
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === " " && !e.repeat && playerYRef.current <= GROUND_Y + 1) {
+        velocityYRef.current = 18;
       }
     }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [currentScene]);
 
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [WORLD_WIDTH, currentScene, isTalking, playerY]);
-
-  // Stop walking on keyup
+  // Main game loop — handles movement + gravity at 60fps
   useEffect(() => {
-    function stopWalking(e: KeyboardEvent) {
-      if (["a", "A", "d", "D"].includes(e.key)) {
+    if (currentScene === 0) return;
+
+    const loop = setInterval(() => {
+      if (isTalkingRef.current) return;
+      if (isPausedRef.current) return;
+
+      const keys = keysRef.current;
+      let dx = 0;
+
+      if (keys.has("a")) dx = -MOVE_SPEED;
+      if (keys.has("d")) dx = MOVE_SPEED;
+
+      if (dx !== 0) {
+        setFacing(dx > 0 ? "right" : "left");
+        setIsWalking(true);
+        setPlayerX(prev => {
+          const next = Math.max(0, Math.min(prev + dx, WORLD_WIDTH - PLAYER_WIDTH));
+          playerXRef.current = next;
+          return next;
+        });
+      } else {
         setIsWalking(false);
       }
-    }
-    window.addEventListener("keyup", stopWalking);
-    return () => window.removeEventListener("keyup", stopWalking);
-  }, []);
 
-  // Gravity
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setPlayerY(prevY => {
-        const nextY = prevY + velocityY;
+      // Gravity + vertical movement
+      velocityYRef.current -= 1.1;
+      const nextY = playerYRef.current + velocityYRef.current;
 
-        setVelocityY(v => v - 1.1); // gravity
-
-        if (nextY <= GROUND_Y) {
-          setVelocityY(0);
-          return GROUND_Y;
-        }
-
-        return nextY;
-      });
+      if (nextY <= GROUND_Y) {
+        velocityYRef.current = 0;
+        playerYRef.current = GROUND_Y;
+        setPlayerY(GROUND_Y);
+      } else {
+        playerYRef.current = nextY;
+        setPlayerY(nextY);
+      }
     }, 16);
 
-    return () => clearInterval(interval);
-  }, [velocityY]);
+    return () => clearInterval(loop);
+  }, [currentScene, WORLD_WIDTH]);
 
-  // Scene switching + NPC
+  // Scene switching + NPC interaction
+  // FIX: playerX is now in the dependency array so it's never stale
   useEffect(() => {
-    if (currentScene === 1 && Math.abs(playerX - BUS_X) < 80) {
+    if (
+      currentScene === 1 &&
+      Math.abs(playerX - BUS_X) < 80 &&
+      isPressingERef.current
+    ) {
       setCurrentScene(2);
       setPlayerX(200);
     }
@@ -162,7 +163,7 @@ const [karma, setKarma] = useState(50); // startverdi
     if (
       currentScene === 2 &&
       Math.abs(playerX - TEMPLE_DOOR_X) < 80 &&
-      isPressingE
+      isPressingERef.current
     ) {
       setCurrentScene(3);
       setPlayerX(200);
@@ -171,14 +172,29 @@ const [karma, setKarma] = useState(50); // startverdi
     if (
       currentScene === 1 &&
       Math.abs(playerX - NPC_X) < 80 &&
-      isPressingE &&
+      isPressingERef.current &&
       !isTalking
     ) {
       setIsTalking(true);
       setQuestionSelected(null);
       setNpcResponse(null);
     }
-  }, [playerX, currentScene, isPressingE, isTalking]);
+  }, [playerX, currentScene, isTalking]);
+
+  function handleMeditate() {
+    setIsTalking(false);
+    setShowMinigame(true);
+  }
+
+  function handleMinigameComplete(earned: number) {
+    setKarma(prev => Math.min(prev + earned, 100));
+    setShowMinigame(false);
+  }
+
+  function handleMinigameClose() {
+    setShowMinigame(false);
+    setIsTalking(true); // return to dialog
+  }
 
   // Dialog logic
   function handleQuestion(index: number) {
@@ -218,6 +234,13 @@ const [karma, setKarma] = useState(50); // startverdi
 
   const playerScale = currentScene === 3 ? 1.6 : 1.15;
 
+  // Press E prompt — world-space X position + label
+  const nearNPC    = currentScene === 1 && Math.abs(playerX - NPC_X) < 80 && !isTalking;
+  const nearTemple = currentScene === 2 && Math.abs(playerX - TEMPLE_DOOR_X) < 80;
+  const nearBus    = currentScene === 1 && Math.abs(playerX - BUS_X) < 80;
+  const promptX    = nearNPC ? NPC_X : nearTemple ? TEMPLE_DOOR_X : nearBus ? BUS_X : null;
+  const promptLabel = nearTemple ? "Enter Temple" : nearBus ? "Board Bus" : "Talk";
+
   return (
     <div style={{ width: "100vw", height: "100vh", overflow: "hidden", position: "relative" }}>
       {/* WORLD */}
@@ -245,6 +268,44 @@ const [karma, setKarma] = useState(50); // startverdi
 
         {currentScene === 1 && <Bus x={BUS_X} />}
         {currentScene === 1 && <NPC x={NPC_X} />}
+
+        {/* Press E prompt — floats above interaction point in world space */}
+        {promptX !== null && (
+          <div style={{
+            position: "absolute",
+            left: promptX - 10,
+            bottom: 180,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 4,
+            animation: "prompt-bob 1s ease-in-out infinite alternate",
+            pointerEvents: "none",
+          }}>
+            <span style={{
+              fontFamily: "'Press Start 2P', monospace",
+              fontSize: 9,
+              color: "#ffdd55",
+              textShadow: "2px 2px #000, 0 0 10px #ffdd5588",
+              letterSpacing: 1,
+              whiteSpace: "nowrap",
+            }}>
+              {promptLabel}
+            </span>
+            <div style={{
+              background: "#ffdd55",
+              color: "#000",
+              fontFamily: "'Press Start 2P', monospace",
+              fontSize: 10,
+              padding: "4px 10px",
+              boxShadow: "3px 3px 0 #aa8800, 0 0 0 2px #000",
+              whiteSpace: "nowrap",
+            }}>
+              E
+            </div>
+            <div style={{ width: 2, height: 10, background: "#ffdd5599" }} />
+          </div>
+        )}
       </div>
 
       {/* MENU */}
@@ -258,10 +319,18 @@ const [karma, setKarma] = useState(50); // startverdi
           onClose={handleCloseDialog}
           onBack={handleBackToQuestions}
           response={npcResponse}
+          onMeditate={handleMeditate}
         />
       )}
-      <KarmaBar karma={karma} />
 
+      <KarmaBar karma={karma} />
+      {isPaused && <PauseMenu onResume={() => setIsPaused(false)} />}
+      {showMinigame && (
+        <BreathingMinigame
+          onComplete={handleMinigameComplete}
+          onClose={handleMinigameClose}
+        />
+      )}
     </div>
   );
 }
