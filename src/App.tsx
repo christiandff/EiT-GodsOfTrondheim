@@ -5,17 +5,25 @@ import { NPC } from "./components/NPC";
 import { Dialog } from "./components/Dialog";
 import { MainMenu } from "./components/MainMenu";
 import { scenes } from "./scenes";
+import { KarmaBar } from "./components/KarmaBar";
+
 
 export default function App() {
   const PLAYER_WIDTH = 48;
+  const GROUND_Y = 10;
 
-  const [currentScene, setCurrentScene] = useState(0); // 0 = menu
+  const [currentScene, setCurrentScene] = useState(0);
   const scene = scenes[currentScene];
   const WORLD_WIDTH = scene.width;
 
   const [playerX, setPlayerX] = useState(200);
-  const [isPressingE, setIsPressingE] = useState(false);
+  const [playerY, setPlayerY] = useState(GROUND_Y);
+  const [velocityY, setVelocityY] = useState(0);
 
+  const [facing, setFacing] = useState<"left" | "right">("right");
+  const [isWalking, setIsWalking] = useState(false);
+
+  const [isPressingE, setIsPressingE] = useState(false);
   const [isTalking, setIsTalking] = useState(false);
   const [questionSelected, setQuestionSelected] = useState<number | null>(null);
   const [npcResponse, setNpcResponse] = useState<string | null>(null);
@@ -24,7 +32,8 @@ export default function App() {
   const TEMPLE_DOOR_X = WORLD_WIDTH / 2;
   const NPC_X = 600;
 
-  // Start game from menu
+const [karma, setKarma] = useState(50); // startverdi
+
   function startGame() {
     setCurrentScene(1);
     setPlayerX(200);
@@ -58,38 +67,98 @@ export default function App() {
     };
   }, []);
 
-  // Movement
+  // Movement + direction + jump
   useEffect(() => {
-    if (currentScene === 0) return; // No movement in menu
-    if (isTalking) return; // No movement while talking
+    if (currentScene === 0) return;
+    if (isTalking) return;
 
     function handleKey(e: KeyboardEvent) {
+      let moved = false;
+
       setPlayerX(prev => {
         let next = prev;
 
-        if (e.key === "d" || e.key === "D") next = prev + 10;
-        if (e.key === "a" || e.key === "A") next = prev - 10;
+        if (e.key === "d" || e.key === "D") {
+          next = prev + 10;
+          setFacing("right");
+          moved = true;
+        }
+        if (e.key === "a" || e.key === "A") {
+          next = prev - 10;
+          setFacing("left");
+          moved = true;
+        }
 
         if (next < 0) next = 0;
         if (next > WORLD_WIDTH - PLAYER_WIDTH) next = WORLD_WIDTH - PLAYER_WIDTH;
 
         return next;
       });
+
+      setIsWalking(moved);
+
+      // karma
+              if (
+          currentScene === 1 &&
+          Math.abs(playerX - NPC_X) < 80 &&
+          isPressingE &&
+          !isTalking
+        ) {
+          setIsTalking(true);
+          setQuestionSelected(null);
+          setNpcResponse(null);
+          setKarma(prev => Math.min(prev + 10, 100)); // øker karma
+        }
+
+
+      // Jump (positive = oppover)
+      if (e.key === " " && playerY === GROUND_Y) {
+        setVelocityY(18);
+      }
     }
 
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [WORLD_WIDTH, currentScene, isTalking]);
+  }, [WORLD_WIDTH, currentScene, isTalking, playerY]);
+
+  // Stop walking on keyup
+  useEffect(() => {
+    function stopWalking(e: KeyboardEvent) {
+      if (["a", "A", "d", "D"].includes(e.key)) {
+        setIsWalking(false);
+      }
+    }
+    window.addEventListener("keyup", stopWalking);
+    return () => window.removeEventListener("keyup", stopWalking);
+  }, []);
+
+  // Gravity
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlayerY(prevY => {
+        const nextY = prevY + velocityY;
+
+        setVelocityY(v => v - 1.1); // gravity
+
+        if (nextY <= GROUND_Y) {
+          setVelocityY(0);
+          return GROUND_Y;
+        }
+
+        return nextY;
+      });
+    }, 16);
+
+    return () => clearInterval(interval);
+  }, [velocityY]);
 
   // Scene switching + NPC
   useEffect(() => {
-    // Scene 1 → 2 (bus)
     if (currentScene === 1 && Math.abs(playerX - BUS_X) < 80) {
       setCurrentScene(2);
       setPlayerX(200);
     }
 
-    // Scene 2 → 3 (door + E)
     if (
       currentScene === 2 &&
       Math.abs(playerX - TEMPLE_DOOR_X) < 80 &&
@@ -99,7 +168,6 @@ export default function App() {
       setPlayerX(200);
     }
 
-    // NPC interaction in scene 1
     if (
       currentScene === 1 &&
       Math.abs(playerX - NPC_X) < 80 &&
@@ -110,7 +178,7 @@ export default function App() {
       setQuestionSelected(null);
       setNpcResponse(null);
     }
-  }, [playerX, currentScene, isPressingE, isTalking, BUS_X, TEMPLE_DOOR_X, NPC_X]);
+  }, [playerX, currentScene, isPressingE, isTalking]);
 
   // Dialog logic
   function handleQuestion(index: number) {
@@ -151,14 +219,7 @@ export default function App() {
   const playerScale = currentScene === 3 ? 1.6 : 1.15;
 
   return (
-    <div
-      style={{
-        width: "100vw",
-        height: "100vh",
-        overflow: "hidden",
-        position: "relative"
-      }}
-    >
+    <div style={{ width: "100vw", height: "100vh", overflow: "hidden", position: "relative" }}>
       {/* WORLD */}
       <div
         style={{
@@ -172,7 +233,16 @@ export default function App() {
           backgroundRepeat: "no-repeat"
         }}
       >
-        {currentScene !== 0 && <Player x={playerX} scale={playerScale} />}
+        {currentScene !== 0 && (
+          <Player
+            x={playerX}
+            y={playerY}
+            scale={playerScale}
+            facing={facing}
+            isWalking={isWalking}
+          />
+        )}
+
         {currentScene === 1 && <Bus x={BUS_X} />}
         {currentScene === 1 && <NPC x={NPC_X} />}
       </div>
@@ -190,6 +260,8 @@ export default function App() {
           response={npcResponse}
         />
       )}
+      <KarmaBar karma={karma} />
+
     </div>
   );
 }

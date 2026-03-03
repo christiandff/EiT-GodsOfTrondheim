@@ -1,20 +1,24 @@
-type PlayerProps = {
-  x: number;
-};
-
-export function Player({ x }: PlayerProps) {
+export function Player({ x, y, scale, facing }) {
   return (
-    <img
-      src="/sprites/player_idle.png"
-      alt="Player"
+    <div
       style={{
         position: "absolute",
-        bottom: "40px",
         left: x,
-        width: "150px",
-        height: "150px",
-        imageRendering: "pixelated"
+        bottom: y,
+        transform: `scale(${scale}) scaleX(${facing === "left" ? -1 : 1})`,
+        transformOrigin: "center",
+        width: 100,
+        height: 100
       }}
-    />
+    >
+      <img
+        src="/sprites/player_idle.png"
+        style={{
+          width: "100%",
+          height: "100%",
+          imageRendering: "pixelated"
+        }}
+      />
+    </div>
   );
 }
