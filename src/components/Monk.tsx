@@ -11,9 +11,10 @@ export function Monk({ x }: MonkProps) {
         position: "absolute",
         bottom: "40px",
         left: x,
-        width: "100px",
-        height: "100px",
-        imageRendering: "pixelated"
+        width: "260px",
+        height: "260px",
+        imageRendering: "pixelated",
+        zIndex: 2 // ligger bak player, men foran bakgrunn
       }}
     />
   );

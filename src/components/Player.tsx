@@ -9,11 +9,10 @@ type PlayerProps = {
 
 const SKINS = [
   "/sprites/player_idle.png",
-  "/sprites/player_idle_1.png",
-  "/sprites/player_idle_2.png",
-  "/sprites/player_idle_3.png",
-  "/sprites/player_idle_4.png",
-  "/sprites/player_idle_5.png"
+  "/sprites/player_idle1.png",
+  "/sprites/player_idle2.png",
+  "/sprites/player_idle3.png",
+  "/sprites/player_idle4.png",
 ];
 
 export function Player({ x, y, scale, facing, skinIndex }: PlayerProps) {
@@ -25,10 +24,12 @@ export function Player({ x, y, scale, facing, skinIndex }: PlayerProps) {
         position: "absolute",
         left: x,
         bottom: y,
+        width: 140,
+        height: 140,
         transform: `scale(${scale}) scaleX(${facing === "left" ? -1 : 1})`,
         transformOrigin: "center",
-        width: 100,
-        height: 100
+        zIndex: 3, // alltid øverst
+        pointerEvents: "none" // valgfritt: gjør at player ikke blokkerer klikk
       }}
     >
       <img

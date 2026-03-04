@@ -1,12 +1,10 @@
-type NPCProps = {
-  x: number;
-};
+type NPC1Props = { x: number };
 
-export function NPC({ x }: NPCProps) {
+export function NPC1({ x }: NPC1Props) {
   return (
     <img
-      src="/sprites/NPC.png"
-      alt="NPC"
+      src="/sprites/NPC1.png"
+      alt="NPC1"
       style={{
         position: "absolute",
         bottom: "40px",

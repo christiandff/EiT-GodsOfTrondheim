@@ -1,52 +1,50 @@
 import { useState } from "react";
 
-type MonkDialogProps = {
+type DiamondMonkDialogProps = {
   onClose: () => void;
-  onTeaMinigame: () => void;
+  onMeditationMinigame: () => void;
 };
 
-// ── Questions + responses ────────────────────────────────
-// Set video: to a filename (e.g. "b2.mp4") to trigger a video for that question.
-// Leave as null to use text responses only.
-const MONK_QUESTIONS: {
+// Set video: to a filename (e.g. "b3.mp4") to trigger a video for that question.
+const DIAMOND_QUESTIONS: {
   question: string;
   video: string | null;
   responses: string[];
 }[] = [
   {
-    question: "What is the essence of Buddhism?",
-    video: null, // swap to e.g. "b2.mp4" when ready
+    question: "What is Diamond Way Buddhism?",
+    video: null,
     responses: [
-      "The essence is the end of suffering. The Buddha taught that life brings suffering, but the path to liberation is open to all.",
-      "At its heart — compassion, awareness, and letting go of attachment. Simple words, but a lifetime of practice.",
+      "Diamond Way is a branch of Kagyu Tibetan Buddhism. The 'diamond' refers to the indestructible nature of the mind — clear, powerful, and unbreakable.",
+      "It was brought to the West by Lama Ole Nydahl in the 1970s. We focus on active, practical methods — meditation, mantras, and direct experience rather than only study.",
     ],
   },
   {
-    question: "How do you practice Buddhism here in Trondheim?",
+    question: "What is the Diamondway center here in Trondheim?",
     video: null,
     responses: [
-      "Every morning I sit in silence for one hour. The cold Norwegian air helps — it keeps the mind sharp.",
-      "The city is loud, but the practice is internal. I walk slowly, breathe deeply, and try to see every person I meet with kindness.",
+      "We are a small community, but very much alive. People from all walks of life come here — students, workers, families. The door is open to everyone who is curious.",
+      "The Trondheim center is part of a global network of over 600 Diamond Way centers. We hold meditations, teachings, and retreats throughout the year.",
     ],
   },
   {
-    question: "What happens when we die? Is rebirth real?",
+    question: "How do you meditate in the Diamond Way tradition?",
     video: null,
     responses: [
-      "The Buddha was careful here. He did not say yes or no. What matters is how you live now — that shapes everything that follows.",
-      "Karma is not punishment. It is simply cause and effect. Each action plants a seed. What grows depends on how mindfully you tend the garden.",
+      "Our main practice is the 16th Karmapa meditation — we visualize a Buddha form, recite mantra, and rest in the open awareness that follows. It is very powerful.",
+      "We use visualization, mantra, and what we call 'the view' — resting in the nature of mind. It is not about emptying the mind, but recognizing its true quality.",
     ],
   },
 ];
 
-export function MonkDialog({ onClose, onTeaMinigame }: MonkDialogProps) {
+export function DiamondMonkDialog({ onClose, onMeditationMinigame }: DiamondMonkDialogProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [response, setResponse] = useState<string | null>(null);
   const [showVideo, setShowVideo] = useState(false);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
 
   function handleSelect(index: number) {
-    const q = MONK_QUESTIONS[index];
+    const q = DIAMOND_QUESTIONS[index];
     setSelectedIndex(index);
 
     if (q.video) {
@@ -61,9 +59,8 @@ export function MonkDialog({ onClose, onTeaMinigame }: MonkDialogProps) {
   function handleVideoEnded() {
     setShowVideo(false);
     setVideoSrc(null);
-    // After video, show a text response too
     if (selectedIndex !== null) {
-      const q = MONK_QUESTIONS[selectedIndex];
+      const q = DIAMOND_QUESTIONS[selectedIndex];
       const random = Math.floor(Math.random() * q.responses.length);
       setResponse(q.responses[random]);
     }
@@ -95,7 +92,7 @@ export function MonkDialog({ onClose, onTeaMinigame }: MonkDialogProps) {
           style={{
             maxWidth: "80vw",
             maxHeight: "80vh",
-            border: "3px solid #334466",
+            border: "3px solid #2244aa",
             boxShadow: "8px 8px 0 #000",
           }}
         />
@@ -116,7 +113,7 @@ export function MonkDialog({ onClose, onTeaMinigame }: MonkDialogProps) {
       background: "rgba(0,0,0,0.88)",
       color: "white",
       padding: "24px",
-      border: "2px solid #886633",
+      border: "2px solid #2255cc",
       boxShadow: "6px 6px 0 #000",
       width: "640px",
       fontFamily: "'Press Start 2P', monospace",
@@ -127,38 +124,38 @@ export function MonkDialog({ onClose, onTeaMinigame }: MonkDialogProps) {
       {/* Header */}
       <div style={{
         fontSize: 9,
-        color: "#ffcc66",
+        color: "#88aaff",
         letterSpacing: 2,
         marginBottom: 12,
-        borderBottom: "1px solid #553311",
+        borderBottom: "1px solid #112266",
         paddingBottom: 8,
         display: "flex",
         alignItems: "center",
         gap: 8,
       }}>
         <img
-          src="/sprites/monk_idle.png"
+          src="/sprites/monk_d.png"
           style={{ width: 28, height: 28, imageRendering: "pixelated" }}
         />
-        ☸ THE MONK
+        ◆ DIAMOND WAY TEACHER
       </div>
 
       {/* Body */}
-      <div style={{ marginBottom: "16px", fontSize: 10, color: "#ffe8bb", lineHeight: 2.2 }}>
-        {response ? response : "Ask me what you wish to know, traveller."}
+      <div style={{ marginBottom: "16px", fontSize: 10, color: "#ccd8ff", lineHeight: 2.2 }}>
+        {response ? response : "Welcome. What would you like to know about Diamond Way?"}
       </div>
 
       {/* Questions */}
       {!response && (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {MONK_QUESTIONS.map((q, i) => (
+          {DIAMOND_QUESTIONS.map((q, i) => (
             <button key={i} onClick={() => handleSelect(i)} style={optionBtn}>
               › {q.question}
-              {q.video && <span style={{ color: "#ffcc66", marginLeft: 8, fontSize: 8 }}>▶ VIDEO</span>}
+              {q.video && <span style={{ color: "#88aaff", marginLeft: 8, fontSize: 8 }}>▶ VIDEO</span>}
             </button>
           ))}
-          <button onClick={onTeaMinigame} style={{ ...optionBtn, borderColor: "#88cc88", color: "#88cc88" }}>
-            🍵 Share a cup of tea (+20 karma)
+          <button onClick={onMeditationMinigame} style={{ ...optionBtn, borderColor: "#55aaff", color: "#55aaff" }}>
+            ☸ Meditate together (+20 karma)
           </button>
         </div>
       )}
@@ -182,9 +179,9 @@ const optionBtn: React.CSSProperties = {
   display: "block",
   width: "100%",
   padding: "10px 14px",
-  background: "#1a1000",
-  color: "#ffe8bb",
-  border: "1px solid #886633",
+  background: "#00081a",
+  color: "#ccd8ff",
+  border: "1px solid #2255cc",
   cursor: "pointer",
   fontFamily: "'Press Start 2P', monospace",
   fontSize: 9,
@@ -195,9 +192,9 @@ const optionBtn: React.CSSProperties = {
 
 const smallBtn: React.CSSProperties = {
   padding: "6px 12px",
-  background: "#1a1000",
-  color: "#aa8844",
-  border: "1px solid #886633",
+  background: "#00081a",
+  color: "#4466aa",
+  border: "1px solid #2255cc",
   cursor: "pointer",
   fontFamily: "'Press Start 2P', monospace",
   fontSize: 8,

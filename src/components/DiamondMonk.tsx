@@ -1,12 +1,12 @@
-type NPCProps = {
+type DiamondMonkProps = {
   x: number;
 };
 
-export function NPC({ x }: NPCProps) {
+export function DiamondMonk({ x }: DiamondMonkProps) {
   return (
     <img
-      src="/sprites/NPC.png"
-      alt="NPC"
+      src="/sprites/monk_d.png"
+      alt="Diamond Way Teacher"
       style={{
         position: "absolute",
         bottom: "40px",

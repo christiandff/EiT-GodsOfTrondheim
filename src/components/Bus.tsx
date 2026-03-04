@@ -12,7 +12,7 @@ export function Bus({ x }: BusProps) {
         bottom: "40px",
         left: x,
         width: "400px",
-        height: "400px",
+        height: "300px",
         imageRendering: "pixelated"
       }}
     />

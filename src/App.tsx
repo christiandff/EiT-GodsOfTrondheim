@@ -8,18 +8,44 @@ import { scenes } from "./scenes";
 import { KarmaBar } from "./components/KarmaBar";
 import { PauseMenu } from "./components/PauseMenu";
 import { BreathingMinigame } from "./components/BreathingMinigame";
+import { MeditationMinigame } from "./components/MeditationMinigame";
+import { TeaMinigame } from "./components/TeaMinigame";
 import { Monk } from "./components/Monk";
 import { MonkDialog } from "./components/MonkDialog";
+import { DiamondMonk } from "./components/DiamondMonk";
+import { DiamondMonkDialog } from "./components/DiamondMonkDialog";
+import { NPC1 } from "./components/NPC1";
+import { NPC2 } from "./components/NPC2";
+import { NPC1Dialog } from "./components/NPC1Dialog";
+import { NPC2Dialog } from "./components/NPC2Dialog";
+import { SceneTransition } from "./components/SceneTransition";
 
-const MOVE_SPEED = 5; // px per frame
+// ── Transition videos ─────────────────────────────────────────────────────
+// Key format: "fromScene-toScene"
+// Set a value to null to skip the video for that transition.
+// Swap out the file paths below when you have your own videos ready.
+const TRANSITION_VIDEOS: Record<string, string | null> = {
+  "0-1": "/sprites/b1.MOV",   // Menu → Trondheim
+  "1-2": "/sprites/b1.MOV",   // Trondheim → Temple exterior
+  "2-3": null,                 // Temple exterior → Temple inside (no video)
+  "3-4": "/sprites/b1.MOV",   // Temple inside → Gamlebroen
+  "4-5": "/sprites/b1.MOV",   // Gamlebroen → Diamondway
+  "5-6": "/sprites/b1.MOV",   // Diamondway → Nirvana
+};
+// ─────────────────────────────────────────────────────────────────────────
+
+const MOVE_SPEED = 5;
 
 export default function App() {
   const PLAYER_WIDTH = 48;
   const GROUND_Y = 10;
 
   const [currentScene, setCurrentScene] = useState(0);
+  const [pendingScene, setPendingScene] = useState<number | null>(null);
   const scene = scenes[currentScene];
-  const WORLD_WIDTH = scene.width;
+  const WORLD_WIDTH = (currentScene === 4 || currentScene === 5)
+    ? window.innerWidth
+    : scene.width;
 
   const [playerX, setPlayerX] = useState(200);
   const [playerY, setPlayerY] = useState(GROUND_Y);
@@ -35,6 +61,11 @@ export default function App() {
   const isTalkingRef = useRef(false);
   const isPausedRef = useRef(false);
   const isTalkingToMonkRef = useRef(false);
+  const isTalkingToDiamondMonkRef = useRef(false);
+  const isTalkingToNPC1Ref = useRef(false);
+  const isTalkingToNPC2Ref = useRef(false);
+  const showTeaMinigameRef = useRef(false);
+  const showDiamondMinigameRef = useRef(false);
 
   const [isTalking, setIsTalking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -44,13 +75,21 @@ export default function App() {
   const BUS_X = WORLD_WIDTH - 350;
   const TEMPLE_DOOR_X = WORLD_WIDTH / 2;
   const NPC_X = 600;
-  const MONK_X = 800; // position in TempleInside (scene 3)
+  const NPC1_X = 1400;
+  const NPC2_X = 2600;
+  const MONK_X = 800;
+  const DIAMOND_MONK_X = 600;
 
   const [karma, setKarma] = useState(0);
   const [showMinigame, setShowMinigame] = useState(false);
+  const [showTeaMinigame, setShowTeaMinigame] = useState(false);
+  const [showDiamondMinigame, setShowDiamondMinigame] = useState(false);
   const [hasPlayed, setHasPlayed] = useState(false);
   const [reincarnationCount, setReincarnationCount] = useState(0);
   const [isTalkingToMonk, setIsTalkingToMonk] = useState(false);
+  const [isTalkingToDiamondMonk, setIsTalkingToDiamondMonk] = useState(false);
+  const [isTalkingToNPC1, setIsTalkingToNPC1] = useState(false);
+  const [isTalkingToNPC2, setIsTalkingToNPC2] = useState(false);
 
   // Keep refs in sync with state
   useEffect(() => { playerYRef.current = playerY; }, [playerY]);
@@ -58,12 +97,17 @@ export default function App() {
   useEffect(() => { isTalkingRef.current = isTalking; }, [isTalking]);
   useEffect(() => { isPausedRef.current = isPaused; }, [isPaused]);
   useEffect(() => { isTalkingToMonkRef.current = isTalkingToMonk; }, [isTalkingToMonk]);
+  useEffect(() => { isTalkingToDiamondMonkRef.current = isTalkingToDiamondMonk; }, [isTalkingToDiamondMonk]);
+  useEffect(() => { isTalkingToNPC1Ref.current = isTalkingToNPC1; }, [isTalkingToNPC1]);
+  useEffect(() => { isTalkingToNPC2Ref.current = isTalkingToNPC2; }, [isTalkingToNPC2]);
+  useEffect(() => { showTeaMinigameRef.current = showTeaMinigame; }, [showTeaMinigame]);
+  useEffect(() => { showDiamondMinigameRef.current = showDiamondMinigame; }, [showDiamondMinigame]);
 
   function startGame() {
-    setCurrentScene(1);
     setPlayerX(200);
     playerXRef.current = 200;
     setHasPlayed(true);
+    goToScene(1);
   }
 
   function restartGame() {
@@ -82,7 +126,22 @@ export default function App() {
     setReincarnationCount(prev => prev + 1);
   }
 
-  // ENTER to start
+  function goToScene(n: number) {
+    const video = TRANSITION_VIDEOS[`${currentScene}-${n}`];
+    if (video === null || video === undefined) {
+      // No video for this transition — switch immediately
+      setCurrentScene(n);
+    } else {
+      setPendingScene(n);
+    }
+  }
+
+  function handleTransitionDone() {
+    if (pendingScene !== null) {
+      setCurrentScene(pendingScene);
+      setPendingScene(null);
+    }
+  }
   useEffect(() => {
     function handleEnter(e: KeyboardEvent) {
       if (currentScene === 0 && e.key === "Enter") startGame();
@@ -138,6 +197,12 @@ export default function App() {
       if (isTalkingRef.current) return;
       if (isPausedRef.current) return;
       if (isTalkingToMonkRef.current) return;
+      if (isTalkingToDiamondMonkRef.current) return;
+      if (isTalkingToNPC1Ref.current) return;
+      if (isTalkingToNPC2Ref.current) return;
+      if (showTeaMinigameRef.current) return;
+      if (showDiamondMinigameRef.current) return;
+      if (pendingScene !== null) return;
 
       const keys = keysRef.current;
       let dx = 0;
@@ -175,15 +240,16 @@ export default function App() {
   }, [currentScene, WORLD_WIDTH]);
 
   // Scene switching + NPC interaction
-  // FIX: playerX is now in the dependency array so it's never stale
   useEffect(() => {
+    if (pendingScene !== null) return; // don't trigger while transition is playing
+
     if (
       currentScene === 1 &&
       Math.abs(playerX - BUS_X) < 80 &&
       isPressingERef.current
     ) {
-      setCurrentScene(2);
       setPlayerX(200);
+      goToScene(2);
     }
 
     if (
@@ -191,23 +257,23 @@ export default function App() {
       Math.abs(playerX - TEMPLE_DOOR_X) < 80 &&
       isPressingERef.current
     ) {
-      setCurrentScene(3);
       setPlayerX(200);
+      goToScene(3);
     }
 
     // TempleInside → Gamlebroen (walk to far right edge)
     if (currentScene === 3 && playerX >= WORLD_WIDTH - PLAYER_WIDTH - 10) {
-      setCurrentScene(4);
       setPlayerX(200);
+      goToScene(4);
     }
 
     // Gamlebroen → Diamondway (walk to far right edge)
     if (currentScene === 4 && playerX >= WORLD_WIDTH - PLAYER_WIDTH - 10) {
-      setCurrentScene(5);
       setPlayerX(200);
+      goToScene(5);
     }
 
-    // Walk back left — spawn at right side of previous scene
+    // Walk back left — no transition video going backwards
     if (currentScene === 4 && playerX <= 10) {
       setCurrentScene(3);
       setPlayerX(WORLD_WIDTH - PLAYER_WIDTH - 20);
@@ -229,6 +295,24 @@ export default function App() {
       setNpcResponse(null);
     }
 
+    if (
+      currentScene === 1 &&
+      Math.abs(playerX - NPC1_X) < 80 &&
+      isPressingERef.current &&
+      !isTalkingToNPC1
+    ) {
+      setIsTalkingToNPC1(true);
+    }
+
+    if (
+      currentScene === 1 &&
+      Math.abs(playerX - NPC2_X) < 80 &&
+      isPressingERef.current &&
+      !isTalkingToNPC2
+    ) {
+      setIsTalkingToNPC2(true);
+    }
+
     // Monk interaction in TempleInside (scene 3)
     if (
       currentScene === 3 &&
@@ -237,8 +321,20 @@ export default function App() {
       !isTalkingToMonk
     ) {
       setIsTalkingToMonk(true);
+      setKarma(prev => Math.min(prev + 10, 100));
     }
-  }, [playerX, currentScene, isTalking, isTalkingToMonk]);
+
+    // Diamond Way teacher interaction in Diamondway (scene 5)
+    if (
+      currentScene === 5 &&
+      Math.abs(playerX - DIAMOND_MONK_X) < 80 &&
+      isPressingERef.current &&
+      !isTalkingToDiamondMonk
+    ) {
+      setIsTalkingToDiamondMonk(true);
+      setKarma(prev => Math.min(prev + 10, 100));
+    }
+  }, [playerX, currentScene, pendingScene, isTalking, isTalkingToMonk, isTalkingToDiamondMonk, isTalkingToNPC1, isTalkingToNPC2]);
 
   function handleMeditate() {
     setIsTalking(false);
@@ -252,7 +348,37 @@ export default function App() {
 
   function handleMinigameClose() {
     setShowMinigame(false);
-    setIsTalking(true); // return to dialog
+    setIsTalking(true);
+  }
+
+  function handleTeaMinigame() {
+    setIsTalkingToMonk(false);
+    setShowTeaMinigame(true);
+  }
+
+  function handleTeaMinigameComplete(earned: number) {
+    setKarma(prev => Math.min(prev + earned, 100));
+    setShowTeaMinigame(false);
+  }
+
+  function handleTeaMinigameClose() {
+    setShowTeaMinigame(false);
+    setIsTalkingToMonk(true);
+  }
+
+  function handleDiamondMinigame() {
+    setIsTalkingToDiamondMonk(false);
+    setShowDiamondMinigame(true);
+  }
+
+  function handleDiamondMinigameComplete(earned: number) {
+    setKarma(prev => Math.min(prev + earned, 100));
+    setShowDiamondMinigame(false);
+  }
+
+  function handleDiamondMinigameClose() {
+    setShowDiamondMinigame(false);
+    setIsTalkingToDiamondMonk(true);
   }
 
   // Dialog logic
@@ -272,6 +398,7 @@ export default function App() {
 
     const random = Math.floor(Math.random() * responses[index].length);
     setNpcResponse(responses[index][random]);
+    setKarma(prev => Math.min(prev + 5, 100));
   }
 
   function handleCloseDialog() {
@@ -291,15 +418,29 @@ export default function App() {
   const maxCameraX = Math.max(0, WORLD_WIDTH - window.innerWidth);
   if (cameraX > maxCameraX) cameraX = maxCameraX;
 
-  const playerScale = currentScene === 3 ? 1.6 : 1.15;
+  const playerScale = currentScene === 3 ? 2.2 : 1.6;
 
   // Press E prompt — world-space X position + label
-  const nearNPC    = currentScene === 1 && Math.abs(playerX - NPC_X) < 80 && !isTalking;
-  const nearTemple = currentScene === 2 && Math.abs(playerX - TEMPLE_DOOR_X) < 80;
-  const nearBus    = currentScene === 1 && Math.abs(playerX - BUS_X) < 80;
-  const nearMonk   = currentScene === 3 && Math.abs(playerX - MONK_X) < 80 && !isTalkingToMonk;
-  const promptX    = nearNPC ? NPC_X : nearTemple ? TEMPLE_DOOR_X : nearBus ? BUS_X : nearMonk ? MONK_X : null;
-  const promptLabel = nearTemple ? "Enter Temple" : nearBus ? "Board Bus" : nearMonk ? "Speak with Monk" : "Talk";
+  const nearNPC         = currentScene === 1 && Math.abs(playerX - NPC_X) < 80 && !isTalking;
+  const nearNPC1        = currentScene === 1 && Math.abs(playerX - NPC1_X) < 80 && !isTalkingToNPC1;
+  const nearNPC2        = currentScene === 1 && Math.abs(playerX - NPC2_X) < 80 && !isTalkingToNPC2;
+  const nearTemple      = currentScene === 2 && Math.abs(playerX - TEMPLE_DOOR_X) < 80;
+  const nearBus         = currentScene === 1 && Math.abs(playerX - BUS_X) < 80;
+  const nearMonk        = currentScene === 3 && Math.abs(playerX - MONK_X) < 80 && !isTalkingToMonk;
+  const nearDiamondMonk = currentScene === 5 && Math.abs(playerX - DIAMOND_MONK_X) < 80 && !isTalkingToDiamondMonk;
+  const promptX =
+    nearNPC ? NPC_X :
+    nearNPC1 ? NPC1_X :
+    nearNPC2 ? NPC2_X :
+    nearTemple ? TEMPLE_DOOR_X :
+    nearBus ? BUS_X :
+    nearMonk ? MONK_X :
+    nearDiamondMonk ? DIAMOND_MONK_X : null;
+  const promptLabel =
+    nearTemple ? "Enter Temple" :
+    nearBus ? "Board Bus" :
+    nearMonk ? "Speak with Monk" :
+    nearDiamondMonk ? "Speak with Teacher" : "Talk";
 
   return (
     <div style={{ width: "100vw", height: "100vh", overflow: "hidden", position: "relative" }}>
@@ -312,9 +453,9 @@ export default function App() {
           width: WORLD_WIDTH,
           height: "100vh",
           backgroundImage: `url(${scene.background})`,
-          backgroundSize: (currentScene === 4 || currentScene === 5) ? "cover" : `${WORLD_WIDTH}px 100%`,
+          backgroundSize: (currentScene === 4 || currentScene === 5) ? "100vw 100vh" : `${WORLD_WIDTH}px 100%`,
           backgroundRepeat: "no-repeat",
-          backgroundPosition: "center"
+          backgroundPosition: "top left"
         }}
       >
         {currentScene !== 0 && (
@@ -330,7 +471,10 @@ export default function App() {
 
         {currentScene === 1 && <Bus x={BUS_X} />}
         {currentScene === 1 && <NPC x={NPC_X} />}
+        {currentScene === 1 && <NPC1 x={NPC1_X} />}
+        {currentScene === 1 && <NPC2 x={NPC2_X} />}
         {currentScene === 3 && <Monk x={MONK_X} />}
+        {currentScene === 5 && <DiamondMonk x={DIAMOND_MONK_X} />}
 
         {/* Press E prompt — floats above interaction point in world space */}
         {promptX !== null && (
@@ -385,15 +529,114 @@ export default function App() {
         />
       )}
 
-      <KarmaBar karma={karma} />
+      {currentScene !== 6 && currentScene !== 0 && (
+        <KarmaBar karma={karma} onNirvana={() => goToScene(6)} />
+      )}
+      {currentScene === 6 && (
+        <div style={{
+          position: "absolute", inset: 0, zIndex: 50,
+          display: "flex", flexDirection: "column",
+          alignItems: "center", justifyContent: "center",
+          gap: 32,
+        }}>
+          <div style={{
+            fontFamily: "'Press Start 2P', monospace",
+            fontSize: 22,
+            color: "#ffffff",
+            textShadow: "0 0 20px #ffffffaa, 3px 3px #000",
+            letterSpacing: 3,
+            marginBottom: 16,
+          }}>
+            ☸ NIRVANA ☸
+          </div>
+
+          {/* Bodhisattva — restart and play again */}
+          <button
+            onClick={restartGame}
+            style={{
+              fontFamily: "'Press Start 2P', monospace",
+              fontSize: 16,
+              color: "#000",
+              background: "#ffdd55",
+              border: "none",
+              padding: "24px 48px",
+              cursor: "pointer",
+              letterSpacing: 2,
+              boxShadow: "6px 6px 0 #aa8800, 0 0 0 3px #000, 0 0 24px #ffdd5566",
+            }}
+          >
+            ☸ BODHISATTVA
+          </button>
+          <div style={{
+            fontFamily: "'Press Start 2P', monospace",
+            fontSize: 8,
+            color: "#aaaaaa",
+            letterSpacing: 1,
+            marginTop: -16,
+          }}>
+            return to help others
+          </div>
+
+          {/* Stay in Nirvana — go to main menu */}
+          <button
+            onClick={() => {
+              setCurrentScene(0);
+              setKarma(0);
+            }}
+            style={{
+              fontFamily: "'Press Start 2P', monospace",
+              fontSize: 16,
+              color: "#000",
+              background: "#aaddff",
+              border: "none",
+              padding: "24px 48px",
+              cursor: "pointer",
+              letterSpacing: 2,
+              boxShadow: "6px 6px 0 #336688, 0 0 0 3px #000, 0 0 24px #aaddff66",
+              marginTop: 8,
+            }}
+          >
+            ✦ STAY IN NIRVANA
+          </button>
+          <div style={{
+            fontFamily: "'Press Start 2P', monospace",
+            fontSize: 8,
+            color: "#aaaaaa",
+            letterSpacing: 1,
+            marginTop: -16,
+          }}>
+            return to main menu
+          </div>
+        </div>
+      )}
       {isPaused && <PauseMenu onResume={() => setIsPaused(false)} onRestart={restartGame} />}
       {isTalkingToMonk && currentScene === 3 && (
-        <MonkDialog onClose={() => setIsTalkingToMonk(false)} />
+        <MonkDialog onClose={() => setIsTalkingToMonk(false)} onTeaMinigame={handleTeaMinigame} />
+      )}
+      {isTalkingToDiamondMonk && currentScene === 5 && (
+        <DiamondMonkDialog onClose={() => setIsTalkingToDiamondMonk(false)} onMeditationMinigame={handleDiamondMinigame} />
+      )}
+      {isTalkingToNPC1 && currentScene === 1 && (
+        <NPC1Dialog onClose={() => setIsTalkingToNPC1(false)} onKarma={() => setKarma(prev => Math.min(prev + 5, 100))} />
+      )}
+      {isTalkingToNPC2 && currentScene === 1 && (
+        <NPC2Dialog onClose={() => setIsTalkingToNPC2(false)} onKarma={() => setKarma(prev => Math.min(prev + 5, 100))} />
       )}
       {showMinigame && (
-        <BreathingMinigame
-          onComplete={handleMinigameComplete}
-          onClose={handleMinigameClose}
+        <BreathingMinigame onComplete={handleMinigameComplete} onClose={handleMinigameClose} />
+      )}
+      {showTeaMinigame && (
+        <TeaMinigame onComplete={handleTeaMinigameComplete} onClose={handleTeaMinigameClose} />
+      )}
+      {showDiamondMinigame && (
+        <MeditationMinigame onComplete={handleDiamondMinigameComplete} onClose={handleDiamondMinigameClose} />
+      )}
+
+      {/* Scene transition video — sits on top of everything */}
+      {pendingScene !== null && (
+        <SceneTransition
+          videoSrc={TRANSITION_VIDEOS[`${currentScene}-${pendingScene}`] ?? "/sprites/b1.MOV"}
+          onDone={handleTransitionDone}
         />
       )}
     </div>
