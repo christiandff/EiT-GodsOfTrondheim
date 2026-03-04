@@ -60,6 +60,7 @@ export default function App() {
   const playerXRef = useRef(200);
   const isTalkingRef = useRef(false);
   const isPausedRef = useRef(false);
+  const pendingSceneRef = useRef<number | null>(null);
   const isTalkingToMonkRef = useRef(false);
   const isTalkingToDiamondMonkRef = useRef(false);
   const isTalkingToNPC1Ref = useRef(false);
@@ -96,6 +97,7 @@ export default function App() {
   useEffect(() => { playerXRef.current = playerX; }, [playerX]);
   useEffect(() => { isTalkingRef.current = isTalking; }, [isTalking]);
   useEffect(() => { isPausedRef.current = isPaused; }, [isPaused]);
+  useEffect(() => { pendingSceneRef.current = pendingScene; }, [pendingScene]);
   useEffect(() => { isTalkingToMonkRef.current = isTalkingToMonk; }, [isTalkingToMonk]);
   useEffect(() => { isTalkingToDiamondMonkRef.current = isTalkingToDiamondMonk; }, [isTalkingToDiamondMonk]);
   useEffect(() => { isTalkingToNPC1Ref.current = isTalkingToNPC1; }, [isTalkingToNPC1]);
@@ -107,7 +109,7 @@ export default function App() {
     setPlayerX(200);
     playerXRef.current = 200;
     setHasPlayed(true);
-    goToScene(1);
+    goToScene(1, 0);
   }
 
   function restartGame() {
@@ -126,10 +128,10 @@ export default function App() {
     setReincarnationCount(prev => prev + 1);
   }
 
-  function goToScene(n: number) {
-    const video = TRANSITION_VIDEOS[`${currentScene}-${n}`];
+  function goToScene(n: number, from?: number) {
+    const fromScene = from ?? currentScene;
+    const video = TRANSITION_VIDEOS[`${fromScene}-${n}`];
     if (video === null || video === undefined) {
-      // No video for this transition — switch immediately
       setCurrentScene(n);
     } else {
       setPendingScene(n);
@@ -202,7 +204,7 @@ export default function App() {
       if (isTalkingToNPC2Ref.current) return;
       if (showTeaMinigameRef.current) return;
       if (showDiamondMinigameRef.current) return;
-      if (pendingScene !== null) return;
+      if (pendingSceneRef.current !== null) return;
 
       const keys = keysRef.current;
       let dx = 0;
@@ -476,44 +478,48 @@ export default function App() {
         {currentScene === 3 && <Monk x={MONK_X} />}
         {currentScene === 5 && <DiamondMonk x={DIAMOND_MONK_X} />}
 
-        {/* Press E prompt — floats above interaction point in world space */}
-        {promptX !== null && (
-          <div style={{
-            position: "absolute",
-            left: promptX - 10,
-            bottom: 180,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 4,
-            animation: "prompt-bob 1s ease-in-out infinite alternate",
-            pointerEvents: "none",
-          }}>
-            <span style={{
-              fontFamily: "'Press Start 2P', monospace",
-              fontSize: 9,
-              color: "#ffdd55",
-              textShadow: "2px 2px #000, 0 0 10px #ffdd5588",
-              letterSpacing: 1,
-              whiteSpace: "nowrap",
-            }}>
-              {promptLabel}
-            </span>
-            <div style={{
-              background: "#ffdd55",
-              color: "#000",
-              fontFamily: "'Press Start 2P', monospace",
-              fontSize: 10,
-              padding: "4px 10px",
-              boxShadow: "3px 3px 0 #aa8800, 0 0 0 2px #000",
-              whiteSpace: "nowrap",
-            }}>
-              E
-            </div>
-            <div style={{ width: 2, height: 10, background: "#ffdd5599" }} />
-          </div>
-        )}
+        {/* Press E prompt — removed from here, rendered in screen space below */}
       </div>
+
+      {/* Press E prompt — screen-space, always above the player */}
+      {promptX !== null && (
+        <div style={{
+          position: "absolute",
+          left: playerX - cameraX + 60,
+          bottom: 200,
+          transform: "translateX(-50%)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 4,
+          animation: "prompt-bob 1s ease-in-out infinite alternate",
+          pointerEvents: "none",
+          zIndex: 20,
+        }}>
+          <span style={{
+            fontFamily: "'Press Start 2P', monospace",
+            fontSize: 9,
+            color: "#ffdd55",
+            textShadow: "2px 2px #000, 0 0 10px #ffdd5588",
+            letterSpacing: 1,
+            whiteSpace: "nowrap",
+          }}>
+            {promptLabel}
+          </span>
+          <div style={{
+            background: "#ffdd55",
+            color: "#000",
+            fontFamily: "'Press Start 2P', monospace",
+            fontSize: 10,
+            padding: "4px 10px",
+            boxShadow: "3px 3px 0 #aa8800, 0 0 0 2px #000",
+            whiteSpace: "nowrap",
+          }}>
+            E
+          </div>
+          <div style={{ width: 2, height: 10, background: "#ffdd5599" }} />
+        </div>
+      )}
 
       {currentScene === 0 && <MainMenu onStart={startGame} onRestart={hasPlayed ? restartGame : undefined} />}
 
