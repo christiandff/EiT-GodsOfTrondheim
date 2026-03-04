@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "../styles/MenuTitle.css";
 
-export function MainMenu({ onStart }: { onStart: () => void }) {
+export function MainMenu({ onStart, onRestart }: { onStart: () => void; onRestart?: () => void }) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -67,6 +67,16 @@ export function MainMenu({ onStart }: { onStart: () => void }) {
         <button className="menu-start-btn" onClick={onStart}>
           <span className="btn-arrow">▶</span> START GAME
         </button>
+
+        {onRestart && (
+          <button
+            className="menu-start-btn"
+            onClick={onRestart}
+            style={{ background: "#ff6644", fontSize: 14, marginTop: -8 }}
+          >
+            ☸ REINCARNATE
+          </button>
+        )}
 
         <div className="menu-enter-hint">— or press ENTER —</div>
 

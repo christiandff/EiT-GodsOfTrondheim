@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 type DialogProps = {
   questionSelected: number | null;
   onSelect: (index: number) => void;
@@ -20,6 +22,66 @@ export function Dialog({
     "How do you think a Buddhist lives in Trondheim?"
   ];
 
+  const [showVideo, setShowVideo] = useState(false);
+
+  function handleSelect(index: number) {
+    if (index === 0) {
+      setShowVideo(true);
+    } else {
+      onSelect(index);
+    }
+  }
+
+  function handleVideoEnded() {
+    setShowVideo(false);
+  }
+
+  // ── Video overlay ──────────────────────────────────────
+  if (showVideo) {
+    return (
+      <div style={{
+        position: "absolute",
+        inset: 0,
+        zIndex: 20,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "rgba(0,0,0,0.92)",
+      }}>
+        <video
+          src="/sprites/b1.MOV"
+          autoPlay
+          onEnded={handleVideoEnded}
+          style={{
+            maxWidth: "80vw",
+            maxHeight: "80vh",
+            border: "3px solid #334466",
+            boxShadow: "8px 8px 0 #000",
+          }}
+        />
+        <button
+          onClick={handleVideoEnded}
+          style={{
+            position: "absolute",
+            bottom: "10%",
+            right: "12%",
+            fontFamily: "'Press Start 2P', monospace",
+            fontSize: 9,
+            color: "#7799bb",
+            background: "#0d1a2e",
+            border: "1px solid #334466",
+            padding: "8px 16px",
+            cursor: "pointer",
+            letterSpacing: 1,
+          }}
+        >
+          SKIP ▶▶
+        </button>
+      </div>
+    );
+  }
+
+  // ── Normal dialog ──────────────────────────────────────
   return (
     <div style={{
       position: "absolute",
@@ -60,14 +122,13 @@ export function Dialog({
           {questions.map((q, i) => (
             <button
               key={i}
-              onClick={() => onSelect(i)}
+              onClick={() => handleSelect(i)}
               style={optionBtn}
             >
               › {q}
             </button>
           ))}
 
-          {/* Meditate option */}
           <button onClick={onMeditate} style={{ ...optionBtn, borderColor: "#55aaff", color: "#55aaff" }}>
             ☸ Meditate together (+20 karma)
           </button>

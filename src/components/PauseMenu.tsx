@@ -1,8 +1,9 @@
 type PauseMenuProps = {
   onResume: () => void;
+  onRestart: () => void;
 };
 
-export function PauseMenu({ onResume }: PauseMenuProps) {
+export function PauseMenu({ onResume, onRestart }: PauseMenuProps) {
   return (
     <div style={{
       position: "absolute",
@@ -85,6 +86,32 @@ export function PauseMenu({ onResume }: PauseMenuProps) {
           }}
         >
           ▶ RESUME
+        </button>
+
+        <button
+          onClick={onRestart}
+          style={{
+            fontFamily: "'Press Start 2P', monospace",
+            fontSize: 14,
+            color: "#fff",
+            background: "#ff6644",
+            border: "none",
+            padding: "14px 32px",
+            cursor: "pointer",
+            letterSpacing: 2,
+            boxShadow: "4px 4px 0 #aa3322, 0 0 0 2px #000",
+            transition: "transform 0.08s, box-shadow 0.08s",
+          }}
+          onMouseEnter={e => {
+            (e.target as HTMLButtonElement).style.transform = "translate(-2px,-2px)";
+            (e.target as HTMLButtonElement).style.boxShadow = "6px 6px 0 #aa3322, 0 0 0 2px #000";
+          }}
+          onMouseLeave={e => {
+            (e.target as HTMLButtonElement).style.transform = "";
+            (e.target as HTMLButtonElement).style.boxShadow = "4px 4px 0 #aa3322, 0 0 0 2px #000";
+          }}
+        >
+          ☸ REINCARNATE
         </button>
       </div>
     </div>

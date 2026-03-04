@@ -4,9 +4,21 @@ type PlayerProps = {
   scale: number;
   facing: "left" | "right";
   isWalking: boolean;
+  skinIndex: number;
 };
 
-export function Player({ x, y, scale, facing }: PlayerProps) {
+const SKINS = [
+  "/sprites/player_idle.png",
+  "/sprites/player_idle_1.png",
+  "/sprites/player_idle_2.png",
+  "/sprites/player_idle_3.png",
+  "/sprites/player_idle_4.png",
+  "/sprites/player_idle_5.png"
+];
+
+export function Player({ x, y, scale, facing, skinIndex }: PlayerProps) {
+  const sprite = SKINS[skinIndex % SKINS.length];
+
   return (
     <div
       style={{
@@ -20,7 +32,7 @@ export function Player({ x, y, scale, facing }: PlayerProps) {
       }}
     >
       <img
-        src="/sprites/player_idle.png"
+        src={sprite}
         style={{
           width: "100%",
           height: "100%",

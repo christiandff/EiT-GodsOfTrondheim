@@ -14,5 +14,13 @@ export const scenes = {
   3: {
     background: "/bg/TempleInside.png",
     width: 3840
+  },
+  4: {
+    background: "/bg/Gamlebroen.png",
+    width: 1536
+  },
+  5: {
+    background: "/bg/Diamondway.png",
+    width: 1536
   }
 } as const;

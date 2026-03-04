@@ -8,6 +8,8 @@ import { scenes } from "./scenes";
 import { KarmaBar } from "./components/KarmaBar";
 import { PauseMenu } from "./components/PauseMenu";
 import { BreathingMinigame } from "./components/BreathingMinigame";
+import { Monk } from "./components/Monk";
+import { MonkDialog } from "./components/MonkDialog";
 
 const MOVE_SPEED = 5; // px per frame
 
@@ -32,6 +34,7 @@ export default function App() {
   const playerXRef = useRef(200);
   const isTalkingRef = useRef(false);
   const isPausedRef = useRef(false);
+  const isTalkingToMonkRef = useRef(false);
 
   const [isTalking, setIsTalking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -41,20 +44,42 @@ export default function App() {
   const BUS_X = WORLD_WIDTH - 350;
   const TEMPLE_DOOR_X = WORLD_WIDTH / 2;
   const NPC_X = 600;
+  const MONK_X = 800; // position in TempleInside (scene 3)
 
   const [karma, setKarma] = useState(0);
   const [showMinigame, setShowMinigame] = useState(false);
+  const [hasPlayed, setHasPlayed] = useState(false);
+  const [reincarnationCount, setReincarnationCount] = useState(0);
+  const [isTalkingToMonk, setIsTalkingToMonk] = useState(false);
 
   // Keep refs in sync with state
   useEffect(() => { playerYRef.current = playerY; }, [playerY]);
   useEffect(() => { playerXRef.current = playerX; }, [playerX]);
   useEffect(() => { isTalkingRef.current = isTalking; }, [isTalking]);
   useEffect(() => { isPausedRef.current = isPaused; }, [isPaused]);
+  useEffect(() => { isTalkingToMonkRef.current = isTalkingToMonk; }, [isTalkingToMonk]);
 
   function startGame() {
     setCurrentScene(1);
     setPlayerX(200);
     playerXRef.current = 200;
+    setHasPlayed(true);
+  }
+
+  function restartGame() {
+    setCurrentScene(0);
+    setPlayerX(200);
+    playerXRef.current = 200;
+    setKarma(0);
+    setIsTalking(false);
+    setIsPaused(false);
+    setShowMinigame(false);
+    setQuestionSelected(null);
+    setNpcResponse(null);
+    velocityYRef.current = 0;
+    playerYRef.current = GROUND_Y;
+    setPlayerY(GROUND_Y);
+    setReincarnationCount(prev => prev + 1);
   }
 
   // ENTER to start
@@ -112,6 +137,7 @@ export default function App() {
     const loop = setInterval(() => {
       if (isTalkingRef.current) return;
       if (isPausedRef.current) return;
+      if (isTalkingToMonkRef.current) return;
 
       const keys = keysRef.current;
       let dx = 0;
@@ -169,6 +195,29 @@ export default function App() {
       setPlayerX(200);
     }
 
+    // TempleInside → Gamlebroen (walk to far right edge)
+    if (currentScene === 3 && playerX >= WORLD_WIDTH - PLAYER_WIDTH - 10) {
+      setCurrentScene(4);
+      setPlayerX(200);
+    }
+
+    // Gamlebroen → Diamondway (walk to far right edge)
+    if (currentScene === 4 && playerX >= WORLD_WIDTH - PLAYER_WIDTH - 10) {
+      setCurrentScene(5);
+      setPlayerX(200);
+    }
+
+    // Walk back left — spawn at right side of previous scene
+    if (currentScene === 4 && playerX <= 10) {
+      setCurrentScene(3);
+      setPlayerX(WORLD_WIDTH - PLAYER_WIDTH - 20);
+    }
+
+    if (currentScene === 5 && playerX <= 10) {
+      setCurrentScene(4);
+      setPlayerX(WORLD_WIDTH - PLAYER_WIDTH - 20);
+    }
+
     if (
       currentScene === 1 &&
       Math.abs(playerX - NPC_X) < 80 &&
@@ -179,7 +228,17 @@ export default function App() {
       setQuestionSelected(null);
       setNpcResponse(null);
     }
-  }, [playerX, currentScene, isTalking]);
+
+    // Monk interaction in TempleInside (scene 3)
+    if (
+      currentScene === 3 &&
+      Math.abs(playerX - MONK_X) < 80 &&
+      isPressingERef.current &&
+      !isTalkingToMonk
+    ) {
+      setIsTalkingToMonk(true);
+    }
+  }, [playerX, currentScene, isTalking, isTalkingToMonk]);
 
   function handleMeditate() {
     setIsTalking(false);
@@ -238,8 +297,9 @@ export default function App() {
   const nearNPC    = currentScene === 1 && Math.abs(playerX - NPC_X) < 80 && !isTalking;
   const nearTemple = currentScene === 2 && Math.abs(playerX - TEMPLE_DOOR_X) < 80;
   const nearBus    = currentScene === 1 && Math.abs(playerX - BUS_X) < 80;
-  const promptX    = nearNPC ? NPC_X : nearTemple ? TEMPLE_DOOR_X : nearBus ? BUS_X : null;
-  const promptLabel = nearTemple ? "Enter Temple" : nearBus ? "Board Bus" : "Talk";
+  const nearMonk   = currentScene === 3 && Math.abs(playerX - MONK_X) < 80 && !isTalkingToMonk;
+  const promptX    = nearNPC ? NPC_X : nearTemple ? TEMPLE_DOOR_X : nearBus ? BUS_X : nearMonk ? MONK_X : null;
+  const promptLabel = nearTemple ? "Enter Temple" : nearBus ? "Board Bus" : nearMonk ? "Speak with Monk" : "Talk";
 
   return (
     <div style={{ width: "100vw", height: "100vh", overflow: "hidden", position: "relative" }}>
@@ -252,8 +312,9 @@ export default function App() {
           width: WORLD_WIDTH,
           height: "100vh",
           backgroundImage: `url(${scene.background})`,
-          backgroundSize: `${WORLD_WIDTH}px 100%`,
-          backgroundRepeat: "no-repeat"
+          backgroundSize: (currentScene === 4 || currentScene === 5) ? "cover" : `${WORLD_WIDTH}px 100%`,
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center"
         }}
       >
         {currentScene !== 0 && (
@@ -263,11 +324,13 @@ export default function App() {
             scale={playerScale}
             facing={facing}
             isWalking={isWalking}
+            skinIndex={reincarnationCount}
           />
         )}
 
         {currentScene === 1 && <Bus x={BUS_X} />}
         {currentScene === 1 && <NPC x={NPC_X} />}
+        {currentScene === 3 && <Monk x={MONK_X} />}
 
         {/* Press E prompt — floats above interaction point in world space */}
         {promptX !== null && (
@@ -308,8 +371,7 @@ export default function App() {
         )}
       </div>
 
-      {/* MENU */}
-      {currentScene === 0 && <MainMenu onStart={startGame} />}
+      {currentScene === 0 && <MainMenu onStart={startGame} onRestart={hasPlayed ? restartGame : undefined} />}
 
       {/* DIALOG */}
       {isTalking && currentScene === 1 && (
@@ -324,7 +386,10 @@ export default function App() {
       )}
 
       <KarmaBar karma={karma} />
-      {isPaused && <PauseMenu onResume={() => setIsPaused(false)} />}
+      {isPaused && <PauseMenu onResume={() => setIsPaused(false)} onRestart={restartGame} />}
+      {isTalkingToMonk && currentScene === 3 && (
+        <MonkDialog onClose={() => setIsTalkingToMonk(false)} />
+      )}
       {showMinigame && (
         <BreathingMinigame
           onComplete={handleMinigameComplete}
