@@ -19,7 +19,7 @@ Walk through Trondheim, talk to people, learn about Buddhism, and fill your **Ka
 
 ### Step by step
 1. Press **START GAME** or hit `ENTER` on the main menu
-2. Explore the city — walk right and talk to strangers with `E`
+2. Explore the city - walk right and talk to strangers with `E`
 3. Board the **bus** at the far right to travel to the Temple
 4. Enter the **Temple** and speak with the Monk inside
 5. Continue into the **Diamond Way** centre and meet the Teacher
@@ -41,18 +41,18 @@ The project combines game design, interactive learning, and cultural exploration
 
 ## Features
 
-- 🗺️ **5 explorable scenes** — Trondheim city, Temple exterior, Temple interior, Diamond Way centre, and Nirvana
-- 🧍 **6 unique NPCs** — strangers, a student, a philosopher, a temple monk, and a Diamond Way teacher
-- 💬 **Dialog system** — choose questions and receive randomised responses with karma rewards
+- 🗺️ **5 explorable scenes** - Trondheim city, Temple exterior, Temple interior, Diamond Way centre, and Nirvana
+- 🧍 **6 unique NPCs** - strangers, a student, a philosopher, a temple monk, and a Diamond Way teacher
+- 💬 **Dialog system** - choose questions and receive randomised responses with karma rewards
 - 🎮 **3 minigames**:
-  - **Breathing meditation** — sync your breath with the rhythm using SPACE
-  - **Tea ceremony** — pour the perfect cup by releasing SPACE in the green zone
-  - **Mantra beads** — click glowing mala beads before they fade
-- ☸ **Karma system** — earn karma through conversations and minigames, max out at 100 to unlock Nirvana
-- 🎬 **Scene transition videos** — cinematic video clips play between scenes
-- 🔄 **Reincarnation system** — restart the game and get a new player skin each time (6 skins total)
-- ⏸️ **Pause menu** — resume, go to main menu, or reincarnate at any time
-- 🌟 **Nirvana ending** — two ending choices: return as a Bodhisattva or stay in Nirvana
+  - **Breathing meditation** - sync your breath with the rhythm using SPACE
+  - **Tea ceremony** - pour the perfect cup by releasing SPACE in the green zone
+  - **Mantra beads** - click glowing mala beads before they fade
+- ☸ **Karma system** - earn karma through conversations and minigames, max out at 100 to unlock Nirvana
+- 🎬 **Scene transition videos** - cinematic video clips play between scenes
+- 🔄 **Reincarnation system** - restart the game and get a new player skin each time (6 skins total)
+- ⏸️ **Pause menu** - resume, go to main menu, or reincarnate at any time
+- 🌟 **Nirvana ending** - two ending choices: return as a Bodhisattva or stay in Nirvana
 
 ---
 
@@ -73,6 +73,3 @@ Then open [http://localhost:5173](http://localhost:5173) in your browser.
 - [Vite](https://vitejs.dev/) with React Compiler
 - CSS-in-JS inline styles + Press Start 2P pixel font
 
----
-
-*EiT 2026 · NTNU · Trondheim Build*
