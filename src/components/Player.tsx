@@ -13,6 +13,7 @@ const SKINS = [
   "/sprites/player_idle2.png",
   "/sprites/player_idle3.png",
   "/sprites/player_idle4.png",
+  "/sprites/player_idle5.png",
 ];
 
 export function Player({ x, y, scale, facing, skinIndex }: PlayerProps) {

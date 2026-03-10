@@ -28,22 +28,21 @@ const TRANSITION_VIDEOS: Record<string, string | null> = {
   "0-1": "/sprites/b1.MOV",   // Menu → Trondheim
   "1-2": "/sprites/b1.MOV",   // Trondheim → Temple exterior
   "2-3": null,                 // Temple exterior → Temple inside (no video)
-  "3-4": "/sprites/b1.MOV",   // Temple inside → Gamlebroen
-  "4-5": "/sprites/b1.MOV",   // Gamlebroen → Diamondway
-  "5-6": "/sprites/b1.MOV",   // Diamondway → Nirvana
+  "3-4": "/sprites/b1.MOV",   // Temple inside → Diamondway
+  "4-5": "/sprites/b1.MOV",   // Diamondway → Nirvana
 };
 // ─────────────────────────────────────────────────────────────────────────
 
-const MOVE_SPEED = 5;
+const MOVE_SPEED = 10;
 
 export default function App() {
   const PLAYER_WIDTH = 48;
-  const GROUND_Y = 10;
+  const GROUND_Y = 40;
 
   const [currentScene, setCurrentScene] = useState(0);
   const [pendingScene, setPendingScene] = useState<number | null>(null);
   const scene = scenes[currentScene];
-  const WORLD_WIDTH = (currentScene === 4 || currentScene === 5)
+  const WORLD_WIDTH = (currentScene === 4)
     ? window.innerWidth
     : scene.width;
 
@@ -181,7 +180,7 @@ export default function App() {
 
   // Jump on spacebar keydown (single press, not held)
   useEffect(() => {
-    if (currentScene === 0) return;
+    if (currentScene === 0 || currentScene === 5) return;
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === " " && !e.repeat && playerYRef.current <= GROUND_Y + 1) {
         velocityYRef.current = 18;
@@ -193,7 +192,7 @@ export default function App() {
 
   // Main game loop — handles movement + gravity at 60fps
   useEffect(() => {
-    if (currentScene === 0) return;
+    if (currentScene === 0 || currentScene === 5) return;
 
     const loop = setInterval(() => {
       if (isTalkingRef.current) return;
@@ -244,6 +243,7 @@ export default function App() {
   // Scene switching + NPC interaction
   useEffect(() => {
     if (pendingScene !== null) return; // don't trigger while transition is playing
+    if (currentScene === 5) return; // nirvana is locked
 
     if (
       currentScene === 1 &&
@@ -263,26 +263,15 @@ export default function App() {
       goToScene(3);
     }
 
-    // TempleInside → Gamlebroen (walk to far right edge)
+    // TempleInside → Diamondway (walk to far right edge)
     if (currentScene === 3 && playerX >= WORLD_WIDTH - PLAYER_WIDTH - 10) {
       setPlayerX(200);
       goToScene(4);
     }
 
-    // Gamlebroen → Diamondway (walk to far right edge)
-    if (currentScene === 4 && playerX >= WORLD_WIDTH - PLAYER_WIDTH - 10) {
-      setPlayerX(200);
-      goToScene(5);
-    }
-
     // Walk back left — no transition video going backwards
     if (currentScene === 4 && playerX <= 10) {
       setCurrentScene(3);
-      setPlayerX(WORLD_WIDTH - PLAYER_WIDTH - 20);
-    }
-
-    if (currentScene === 5 && playerX <= 10) {
-      setCurrentScene(4);
       setPlayerX(WORLD_WIDTH - PLAYER_WIDTH - 20);
     }
 
@@ -326,9 +315,9 @@ export default function App() {
       setKarma(prev => Math.min(prev + 10, 100));
     }
 
-    // Diamond Way teacher interaction in Diamondway (scene 5)
+    // Diamond Way teacher interaction in Diamondway (scene 4)
     if (
-      currentScene === 5 &&
+      currentScene === 4 &&
       Math.abs(playerX - DIAMOND_MONK_X) < 80 &&
       isPressingERef.current &&
       !isTalkingToDiamondMonk
@@ -420,7 +409,8 @@ export default function App() {
   const maxCameraX = Math.max(0, WORLD_WIDTH - window.innerWidth);
   if (cameraX > maxCameraX) cameraX = maxCameraX;
 
-  const playerScale = currentScene === 3 ? 2.2 : 1.6;
+  const playerGroundY = currentScene === 3 ? GROUND_Y + 30 : GROUND_Y;
+  const playerScale = currentScene === 3 ? 1.98 : 1.44;
 
   // Press E prompt — world-space X position + label
   const nearNPC         = currentScene === 1 && Math.abs(playerX - NPC_X) < 80 && !isTalking;
@@ -429,7 +419,7 @@ export default function App() {
   const nearTemple      = currentScene === 2 && Math.abs(playerX - TEMPLE_DOOR_X) < 80;
   const nearBus         = currentScene === 1 && Math.abs(playerX - BUS_X) < 80;
   const nearMonk        = currentScene === 3 && Math.abs(playerX - MONK_X) < 80 && !isTalkingToMonk;
-  const nearDiamondMonk = currentScene === 5 && Math.abs(playerX - DIAMOND_MONK_X) < 80 && !isTalkingToDiamondMonk;
+  const nearDiamondMonk = currentScene === 4 && Math.abs(playerX - DIAMOND_MONK_X) < 80 && !isTalkingToDiamondMonk;
   const promptX =
     nearNPC ? NPC_X :
     nearNPC1 ? NPC1_X :
@@ -455,15 +445,15 @@ export default function App() {
           width: WORLD_WIDTH,
           height: "100vh",
           backgroundImage: `url(${scene.background})`,
-          backgroundSize: (currentScene === 4 || currentScene === 5) ? "100vw 100vh" : `${WORLD_WIDTH}px 100%`,
+          backgroundSize: currentScene === 4 ? "cover" : `${WORLD_WIDTH}px 100%`,
           backgroundRepeat: "no-repeat",
-          backgroundPosition: "top left"
+          backgroundPosition: currentScene === 4 ? "center center" : "top left"
         }}
       >
-        {currentScene !== 0 && (
+        {currentScene !== 0 && currentScene !== 5 && (
           <Player
             x={playerX}
-            y={playerY}
+            y={playerY + (currentScene === 3 ? 50 : 0)}
             scale={playerScale}
             facing={facing}
             isWalking={isWalking}
@@ -476,7 +466,7 @@ export default function App() {
         {currentScene === 1 && <NPC1 x={NPC1_X} />}
         {currentScene === 1 && <NPC2 x={NPC2_X} />}
         {currentScene === 3 && <Monk x={MONK_X} />}
-        {currentScene === 5 && <DiamondMonk x={DIAMOND_MONK_X} />}
+        {currentScene === 4 && <DiamondMonk x={DIAMOND_MONK_X} />}
 
         {/* Press E prompt — removed from here, rendered in screen space below */}
       </div>
@@ -535,10 +525,10 @@ export default function App() {
         />
       )}
 
-      {currentScene !== 6 && currentScene !== 0 && (
-        <KarmaBar karma={karma} onNirvana={() => goToScene(6)} />
+      {currentScene !== 5 && currentScene !== 0 && (
+        <KarmaBar karma={karma} onNirvana={() => setPendingScene(5)} />
       )}
-      {currentScene === 6 && (
+      {currentScene === 5 && (
         <div style={{
           position: "absolute", inset: 0, zIndex: 50,
           display: "flex", flexDirection: "column",
@@ -615,11 +605,11 @@ export default function App() {
           </div>
         </div>
       )}
-      {isPaused && <PauseMenu onResume={() => setIsPaused(false)} onRestart={restartGame} />}
+      {isPaused && <PauseMenu onResume={() => setIsPaused(false)} onRestart={restartGame} onMenu={() => { setIsPaused(false); setCurrentScene(0); setKarma(0); }} />}
       {isTalkingToMonk && currentScene === 3 && (
         <MonkDialog onClose={() => setIsTalkingToMonk(false)} onTeaMinigame={handleTeaMinigame} />
       )}
-      {isTalkingToDiamondMonk && currentScene === 5 && (
+      {isTalkingToDiamondMonk && currentScene === 4 && (
         <DiamondMonkDialog onClose={() => setIsTalkingToDiamondMonk(false)} onMeditationMinigame={handleDiamondMinigame} />
       )}
       {isTalkingToNPC1 && currentScene === 1 && (
