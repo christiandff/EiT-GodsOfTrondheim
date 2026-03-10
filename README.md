@@ -1,75 +1,78 @@
-# React + TypeScript + Vite
+# ☸ Gods of Trondheim
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> *A karmic journey through the city*
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## How to Play
 
-## React Compiler
+### Controls
+| Key | Action |
+|-----|--------|
+| `A` / `D` | Move left / right |
+| `SPACE` | Jump |
+| `E` | Interact with NPCs, board bus, enter temple |
+| `ESC` | Pause / resume |
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+### Objective
+Walk through Trondheim, talk to people, learn about Buddhism, and fill your **Karma Bar** to reach Nirvana.
 
-Note: This will impact Vite dev & build performances.
+### Step by step
+1. Press **START GAME** or hit `ENTER` on the main menu
+2. Explore the city — walk right and talk to strangers with `E`
+3. Board the **bus** at the far right to travel to the Temple
+4. Enter the **Temple** and speak with the Monk inside
+5. Continue into the **Diamond Way** centre and meet the Teacher
+6. Complete minigames and answer questions to earn karma
+7. Once your karma reaches **100**, the ☸ **TIME FOR NIRVANA** button appears
+8. Click it to reach Nirvana — then choose to reincarnate or stay
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## About the Project
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+**Gods of Trondheim** is a 2D side-scrolling platformer created as part of **EiT (Eksperter i Team) 2026** at NTNU. The game explores Buddhism through interactive storytelling set in Trondheim, Norway.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Players walk through a pixelated version of the city, meeting locals and monks who share knowledge about Buddhist philosophy, practice, and how it fits into everyday Norwegian life. The goal is to accumulate karma through meaningful conversations and mindfulness minigames — ultimately reaching Nirvana.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+The project combines game design, interactive learning, and cultural exploration to communicate Buddhist concepts in an accessible and engaging way.
+
+---
+
+## Features
+
+- 🗺️ **5 explorable scenes** — Trondheim city, Temple exterior, Temple interior, Diamond Way centre, and Nirvana
+- 🧍 **6 unique NPCs** — strangers, a student, a philosopher, a temple monk, and a Diamond Way teacher
+- 💬 **Dialog system** — choose questions and receive randomised responses with karma rewards
+- 🎮 **3 minigames**:
+  - **Breathing meditation** — sync your breath with the rhythm using SPACE
+  - **Tea ceremony** — pour the perfect cup by releasing SPACE in the green zone
+  - **Mantra beads** — click glowing mala beads before they fade
+- ☸ **Karma system** — earn karma through conversations and minigames, max out at 100 to unlock Nirvana
+- 🎬 **Scene transition videos** — cinematic video clips play between scenes
+- 🔄 **Reincarnation system** — restart the game and get a new player skin each time (6 skins total)
+- ⏸️ **Pause menu** — resume, go to main menu, or reincarnate at any time
+- 🌟 **Nirvana ending** — two ending choices: return as a Bodhisattva or stay in Nirvana
+
+---
+
+## Getting Started
+
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Then open [http://localhost:5173](http://localhost:5173) in your browser.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Tech Stack
+
+- [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
+- [Vite](https://vitejs.dev/) with React Compiler
+- CSS-in-JS inline styles + Press Start 2P pixel font
+
+---
+
+*EiT 2026 · NTNU · Trondheim Build*
