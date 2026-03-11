@@ -3,9 +3,17 @@ type DiamondMonkProps = {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 };
 
 export function DiamondMonk({ x }: DiamondMonkProps) {
+=======
+  flipped: boolean;
+  
+};
+
+export function DiamondMonk({ x, flipped, }: DiamondMonkProps) {
+>>>>>>> Stashed changes
 =======
   flipped: boolean;
   
