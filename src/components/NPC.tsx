@@ -1,8 +1,10 @@
 type NPCProps = {
-  x: number;
+  x: number;           // actual world position (controlled by App)
+  flipped: boolean;
+  isInteracting?: boolean;
 };
 
-export function NPC({ x }: NPCProps) {
+export function NPC({ x, flipped, isInteracting = false }: NPCProps) {
   return (
     <img
       src="/sprites/NPC.png"
@@ -13,7 +15,8 @@ export function NPC({ x }: NPCProps) {
         left: x,
         width: "160px",
         height: "160px",
-        imageRendering: "pixelated"
+        imageRendering: "pixelated",
+        transform: flipped ? "scaleX(-1)" : "scaleX(1)",
       }}
     />
   );

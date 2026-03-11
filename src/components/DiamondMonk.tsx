@@ -1,8 +1,10 @@
 type DiamondMonkProps = {
   x: number;
+  flipped: boolean;
+  isInteracting?: boolean;
 };
 
-export function DiamondMonk({ x }: DiamondMonkProps) {
+export function DiamondMonk({ x, flipped, isInteracting = false }: DiamondMonkProps) {
   return (
     <img
       src="/sprites/monk_d.png"
@@ -11,9 +13,10 @@ export function DiamondMonk({ x }: DiamondMonkProps) {
         position: "absolute",
         bottom: "40px",
         left: x,
-        width: "160px",
-        height: "160px",
-        imageRendering: "pixelated"
+        width: "210px",
+        height: "210px",
+        imageRendering: "pixelated",
+        transform: flipped ? "scaleX(-1)" : "scaleX(1)",
       }}
     />
   );

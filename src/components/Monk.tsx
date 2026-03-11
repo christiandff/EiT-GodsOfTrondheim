@@ -1,8 +1,10 @@
 type MonkProps = {
   x: number;
+  flipped: boolean;
+  isInteracting?: boolean;
 };
 
-export function Monk({ x }: MonkProps) {
+export function Monk({ x, flipped, isInteracting = false }: MonkProps) {
   return (
     <img
       src="/sprites/monk_idle.png"
@@ -14,7 +16,8 @@ export function Monk({ x }: MonkProps) {
         width: "260px",
         height: "260px",
         imageRendering: "pixelated",
-        zIndex: 2 // ligger bak player, men foran bakgrunn
+        zIndex: 2,
+        transform: flipped ? "scaleX(-1)" : "scaleX(1)",
       }}
     />
   );

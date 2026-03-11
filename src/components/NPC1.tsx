@@ -1,6 +1,10 @@
-type NPC1Props = { x: number };
+type NPC1Props = {
+  x: number;
+  flipped: boolean;
+  isInteracting?: boolean;
+};
 
-export function NPC1({ x }: NPC1Props) {
+export function NPC1({ x, flipped, isInteracting = false }: NPC1Props) {
   return (
     <img
       src="/sprites/NPC1.png"
@@ -11,7 +15,8 @@ export function NPC1({ x }: NPC1Props) {
         left: x,
         width: "160px",
         height: "160px",
-        imageRendering: "pixelated"
+        imageRendering: "pixelated",
+        transform: flipped ? "scaleX(-1)" : "scaleX(1)",
       }}
     />
   );
