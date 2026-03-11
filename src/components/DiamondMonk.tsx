@@ -1,8 +1,16 @@
 type DiamondMonkProps = {
   x: number;
+<<<<<<< Updated upstream
 };
 
 export function DiamondMonk({ x }: DiamondMonkProps) {
+=======
+  flipped: boolean;
+  
+};
+
+export function DiamondMonk({ x, flipped, }: DiamondMonkProps) {
+>>>>>>> Stashed changes
   return (
     <img
       src="/sprites/monk_d.png"

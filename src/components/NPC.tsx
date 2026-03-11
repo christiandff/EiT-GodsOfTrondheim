@@ -1,8 +1,17 @@
 type NPCProps = {
+<<<<<<< Updated upstream
   x: number;
 };
 
 export function NPC({ x }: NPCProps) {
+=======
+  x: number;           // actual world position (controlled by App)
+  flipped: boolean;
+  
+};
+
+export function NPC({ x, flipped, }: NPCProps) {
+>>>>>>> Stashed changes
   return (
     <img
       src="/sprites/NPC.png"

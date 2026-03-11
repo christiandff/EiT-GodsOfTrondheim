@@ -41,7 +41,7 @@ export default function App() {
 
   const [currentScene, setCurrentScene] = useState(0);
   const [pendingScene, setPendingScene] = useState<number | null>(null);
-  const scene = scenes[currentScene];
+  const scene = scenes[currentScene as keyof typeof scenes];
   const WORLD_WIDTH = (currentScene === 4)
     ? window.innerWidth
     : scene.width;
@@ -409,8 +409,13 @@ export default function App() {
   const maxCameraX = Math.max(0, WORLD_WIDTH - window.innerWidth);
   if (cameraX > maxCameraX) cameraX = maxCameraX;
 
+<<<<<<< Updated upstream
   const playerGroundY = currentScene === 3 ? GROUND_Y + 30 : GROUND_Y;
   const playerScale = currentScene === 3 ? 1.98 : 1.44;
+=======
+  // playerGroundY handled inline via y prop offset
+  const playerScale = currentScene === 3 ? 1.98 : currentScene === 4 ? 1.44 + (40 / 140) : 1.44;
+>>>>>>> Stashed changes
 
   // Press E prompt — world-space X position + label
   const nearNPC         = currentScene === 1 && Math.abs(playerX - NPC_X) < 80 && !isTalking;
