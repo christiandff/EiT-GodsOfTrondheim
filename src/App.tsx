@@ -411,9 +411,12 @@ export default function App() {
 
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   const playerGroundY = currentScene === 3 ? GROUND_Y + 30 : GROUND_Y;
   const playerScale = currentScene === 3 ? 1.98 : 1.44;
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
   // playerGroundY handled inline via y prop offset
