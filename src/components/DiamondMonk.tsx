@@ -1,40 +1,10 @@
 type DiamondMonkProps = {
   x: number;
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-};
-
-export function DiamondMonk({ x }: DiamondMonkProps) {
-=======
   flipped: boolean;
   
 };
 
 export function DiamondMonk({ x, flipped, }: DiamondMonkProps) {
->>>>>>> Stashed changes
-=======
-  flipped: boolean;
-  
-};
-
-export function DiamondMonk({ x, flipped, }: DiamondMonkProps) {
->>>>>>> Stashed changes
-=======
-  flipped: boolean;
-  
-};
-
-export function DiamondMonk({ x, flipped, }: DiamondMonkProps) {
->>>>>>> Stashed changes
-=======
-  flipped: boolean;
-  
-};
-
-export function DiamondMonk({ x, flipped, }: DiamondMonkProps) {
->>>>>>> Stashed changes
   return (
     <img
       src="/sprites/monk_d.png"
@@ -43,9 +13,10 @@ export function DiamondMonk({ x, flipped, }: DiamondMonkProps) {
         position: "absolute",
         bottom: "40px",
         left: x,
-        width: "160px",
-        height: "160px",
-        imageRendering: "pixelated"
+        width: "210px",
+        height: "210px",
+        imageRendering: "pixelated",
+        transform: flipped ? "scaleX(-1)" : "scaleX(1)",
       }}
     />
   );

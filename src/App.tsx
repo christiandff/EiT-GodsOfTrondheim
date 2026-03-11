@@ -20,18 +20,8 @@ import { NPC1Dialog } from "./components/NPC1Dialog";
 import { NPC2Dialog } from "./components/NPC2Dialog";
 import { SceneTransition } from "./components/SceneTransition";
 
-// ── Transition videos ─────────────────────────────────────────────────────
-// Key format: "fromScene-toScene"
-// Set a value to null to skip the video for that transition.
-// Swap out the file paths below when you have your own videos ready.
-const TRANSITION_VIDEOS: Record<string, string | null> = {
-  "0-1": "/sprites/b1.MOV",   // Menu → Trondheim
-  "1-2": "/sprites/b1.MOV",   // Trondheim → Temple exterior
-  "2-3": null,                 // Temple exterior → Temple inside (no video)
-  "3-4": "/sprites/b1.MOV",   // Temple inside → Diamondway
-  "4-5": "/sprites/b1.MOV",   // Diamondway → Nirvana
-};
-// ─────────────────────────────────────────────────────────────────────────
+// All transition texts are defined inside SceneTransition.tsx
+
 
 const MOVE_SPEED = 10;
 
@@ -60,6 +50,12 @@ export default function App() {
   const isTalkingRef = useRef(false);
   const isPausedRef = useRef(false);
   const pendingSceneRef = useRef<number | null>(null);
+  const currentSceneRef = useRef(0);
+  const npcOffsetRef  = useRef(0);
+  const npc1OffsetRef = useRef(0);
+  const npc2OffsetRef = useRef(0);
+  const monkOffsetRef = useRef(0);
+  const dmOffsetRef   = useRef(0);
   const isTalkingToMonkRef = useRef(false);
   const isTalkingToDiamondMonkRef = useRef(false);
   const isTalkingToNPC1Ref = useRef(false);
@@ -80,6 +76,91 @@ export default function App() {
   const MONK_X = 800;
   const DIAMOND_MONK_X = 600;
 
+  // ── NPC patrol state ─────────────────────────────────────
+  // Each NPC walks 150px forward, waits 3s, walks 150px back, waits 3s, repeat.
+  // offset is relative to the base X — proximity check uses base + offset.
+  const PATROL_DIST = 150;
+  const PATROL_WAIT = 3000;
+  const PATROL_SPEED = 1.5; // px per frame
+
+  const [npcOffset,   setNpcOffset]   = useState(0);
+  const [npc1Offset,  setNpc1Offset]  = useState(0);
+  const [npc2Offset,  setNpc2Offset]  = useState(0);
+  const [monkOffset,  setMonkOffset]  = useState(0);
+  const [dmOffset,    setDmOffset]    = useState(0);
+
+  const [npcFlipped,  setNpcFlipped]  = useState(false);
+  const [npc1Flipped, setNpc1Flipped] = useState(false);
+  const [npc2Flipped, setNpc2Flipped] = useState(true);  // NPC2 starts facing left
+  const [monkFlipped, setMonkFlipped] = useState(false);
+  const [dmFlipped,   setDmFlipped]   = useState(false);
+
+  // Reusable patrol hook factory — different wait offsets so they're out of sync
+  function usePatrol(
+    isInteracting: boolean,
+    setOffset: React.Dispatch<React.SetStateAction<number>>,
+    setFlipped: React.Dispatch<React.SetStateAction<boolean>>,
+    startFlipped: boolean,
+    phaseOffsetMs: number,
+  ) {
+    const offsetRef = useRef(0);
+    const frameRef  = useRef<number | null>(null);
+    const timerRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const phaseRef  = useRef(0); // 0=walkForward 1=waitAfterForward 2=walkBack 3=waitAfterBack
+
+    useEffect(() => {
+      if (isInteracting) {
+        if (frameRef.current)  cancelAnimationFrame(frameRef.current);
+        if (timerRef.current)  clearTimeout(timerRef.current);
+        return;
+      }
+
+      function walkTo(target: number, onDone: () => void) {
+        const dir = target > offsetRef.current ? 1 : -1;
+        function step() {
+          offsetRef.current += dir * PATROL_SPEED;
+          const reached = dir > 0
+            ? offsetRef.current >= target
+            : offsetRef.current <= target;
+          if (reached) {
+            offsetRef.current = target;
+            setOffset(target);
+            onDone();
+          } else {
+            setOffset(offsetRef.current);
+            frameRef.current = requestAnimationFrame(step);
+          }
+        }
+        frameRef.current = requestAnimationFrame(step);
+      }
+
+      function runPhase() {
+        if (phaseRef.current === 0) {
+          setFlipped(startFlipped);               // face forward direction
+          walkTo(PATROL_DIST * (startFlipped ? -1 : 1), () => {
+            phaseRef.current = 1;
+            timerRef.current = setTimeout(() => { phaseRef.current = 2; runPhase(); }, PATROL_WAIT);
+          });
+        } else if (phaseRef.current === 2) {
+          setFlipped(!startFlipped);              // face back direction
+          walkTo(0, () => {
+            phaseRef.current = 3;
+            timerRef.current = setTimeout(() => { phaseRef.current = 0; runPhase(); }, PATROL_WAIT);
+          });
+        }
+      }
+
+      // Stagger start so NPCs are out of phase with each other
+      timerRef.current = setTimeout(() => runPhase(), phaseOffsetMs);
+
+      return () => {
+        if (frameRef.current) cancelAnimationFrame(frameRef.current);
+        if (timerRef.current) clearTimeout(timerRef.current);
+      };
+    }, [isInteracting]);
+  }
+
+
   const [karma, setKarma] = useState(0);
   const [showMinigame, setShowMinigame] = useState(false);
   const [showTeaMinigame, setShowTeaMinigame] = useState(false);
@@ -97,12 +178,54 @@ export default function App() {
   useEffect(() => { isTalkingRef.current = isTalking; }, [isTalking]);
   useEffect(() => { isPausedRef.current = isPaused; }, [isPaused]);
   useEffect(() => { pendingSceneRef.current = pendingScene; }, [pendingScene]);
+  useEffect(() => { currentSceneRef.current = currentScene; }, [currentScene]);
+  useEffect(() => { npcOffsetRef.current  = npcOffset;  }, [npcOffset]);
+  useEffect(() => { npc1OffsetRef.current = npc1Offset; }, [npc1Offset]);
+  useEffect(() => { npc2OffsetRef.current = npc2Offset; }, [npc2Offset]);
+  useEffect(() => { monkOffsetRef.current = monkOffset; }, [monkOffset]);
+  useEffect(() => { dmOffsetRef.current   = dmOffset;   }, [dmOffset]);
   useEffect(() => { isTalkingToMonkRef.current = isTalkingToMonk; }, [isTalkingToMonk]);
   useEffect(() => { isTalkingToDiamondMonkRef.current = isTalkingToDiamondMonk; }, [isTalkingToDiamondMonk]);
   useEffect(() => { isTalkingToNPC1Ref.current = isTalkingToNPC1; }, [isTalkingToNPC1]);
   useEffect(() => { isTalkingToNPC2Ref.current = isTalkingToNPC2; }, [isTalkingToNPC2]);
+
+  // ── Patrol calls — must be after all state is declared ──
+  usePatrol(isTalking,              setNpcOffset,  setNpcFlipped,  false, 0);
+  usePatrol(isTalkingToNPC1,        setNpc1Offset, setNpc1Flipped, false, 1100);
+  usePatrol(isTalkingToNPC2,        setNpc2Offset, setNpc2Flipped, true,  2200);
+  usePatrol(isTalkingToMonk,        setMonkOffset, setMonkFlipped, false, 600);
+  usePatrol(isTalkingToDiamondMonk, setDmOffset,   setDmFlipped,   false, 1700);
   useEffect(() => { showTeaMinigameRef.current = showTeaMinigame; }, [showTeaMinigame]);
   useEffect(() => { showDiamondMinigameRef.current = showDiamondMinigame; }, [showDiamondMinigame]);
+
+  // Called immediately when E is pressed — uses refs so it's never stale
+  function triggerInteraction() {
+    const px = playerXRef.current;
+    const scene = currentSceneRef.current;
+    if (scene === 5) return;
+
+    if (scene === 1 && Math.abs(px - (NPC_X + npcOffsetRef.current)) < 120 && !isTalkingRef.current) {
+      setIsTalking(true); setQuestionSelected(null); setNpcResponse(null);
+    }
+    if (scene === 1 && Math.abs(px - (NPC1_X + npc1OffsetRef.current)) < 120 && !isTalkingToNPC1Ref.current) {
+      setIsTalkingToNPC1(true);
+    }
+    if (scene === 1 && Math.abs(px - (NPC2_X + npc2OffsetRef.current)) < 120 && !isTalkingToNPC2Ref.current) {
+      setIsTalkingToNPC2(true);
+    }
+    if (scene === 1 && Math.abs(px - BUS_X) < 120) {
+      setPlayerX(200); playerXRef.current = 200; goToScene(2);
+    }
+    if (scene === 2 && Math.abs(px - TEMPLE_DOOR_X) < 120) {
+      setPlayerX(200); playerXRef.current = 200; goToScene(3);
+    }
+    if (scene === 3 && Math.abs(px - (MONK_X + monkOffsetRef.current)) < 120 && !isTalkingToMonkRef.current) {
+      setIsTalkingToMonk(true); setKarma(prev => Math.min(prev + 10, 100));
+    }
+    if (scene === 4 && Math.abs(px - (DIAMOND_MONK_X + dmOffsetRef.current)) < 120 && !isTalkingToDiamondMonkRef.current) {
+      setIsTalkingToDiamondMonk(true); setKarma(prev => Math.min(prev + 10, 100));
+    }
+  }
 
   function startGame() {
     setPlayerX(200);
@@ -129,8 +252,8 @@ export default function App() {
 
   function goToScene(n: number, from?: number) {
     const fromScene = from ?? currentScene;
-    const video = TRANSITION_VIDEOS[`${fromScene}-${n}`];
-    if (video === null || video === undefined) {
+    // Scene 2→3 (temple exterior → inside) has no transition text
+    if (fromScene === 2 && n === 3) {
       setCurrentScene(n);
     } else {
       setPendingScene(n);
@@ -164,7 +287,11 @@ export default function App() {
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       keysRef.current.add(e.key.toLowerCase());
-      if (e.key === "e" || e.key === "E") isPressingERef.current = true;
+      if (e.key === "e" || e.key === "E") {
+        isPressingERef.current = true;
+        // Trigger interaction immediately on keydown — don't wait for playerX to change
+        triggerInteraction();
+      }
     }
     function onKeyUp(e: KeyboardEvent) {
       keysRef.current.delete(e.key.toLowerCase());
@@ -247,7 +374,7 @@ export default function App() {
 
     if (
       currentScene === 1 &&
-      Math.abs(playerX - BUS_X) < 80 &&
+      Math.abs(playerX - BUS_X) < 120 &&
       isPressingERef.current
     ) {
       setPlayerX(200);
@@ -256,7 +383,7 @@ export default function App() {
 
     if (
       currentScene === 2 &&
-      Math.abs(playerX - TEMPLE_DOOR_X) < 80 &&
+      Math.abs(playerX - TEMPLE_DOOR_X) < 120 &&
       isPressingERef.current
     ) {
       setPlayerX(200);
@@ -277,7 +404,7 @@ export default function App() {
 
     if (
       currentScene === 1 &&
-      Math.abs(playerX - NPC_X) < 80 &&
+      Math.abs(playerX - (NPC_X + npcOffset)) < 120 &&
       isPressingERef.current &&
       !isTalking
     ) {
@@ -288,7 +415,7 @@ export default function App() {
 
     if (
       currentScene === 1 &&
-      Math.abs(playerX - NPC1_X) < 80 &&
+      Math.abs(playerX - (NPC1_X + npc1Offset)) < 120 &&
       isPressingERef.current &&
       !isTalkingToNPC1
     ) {
@@ -297,7 +424,7 @@ export default function App() {
 
     if (
       currentScene === 1 &&
-      Math.abs(playerX - NPC2_X) < 80 &&
+      Math.abs(playerX - (NPC2_X + npc2Offset)) < 120 &&
       isPressingERef.current &&
       !isTalkingToNPC2
     ) {
@@ -307,7 +434,7 @@ export default function App() {
     // Monk interaction in TempleInside (scene 3)
     if (
       currentScene === 3 &&
-      Math.abs(playerX - MONK_X) < 80 &&
+      Math.abs(playerX - (MONK_X + monkOffset)) < 120 &&
       isPressingERef.current &&
       !isTalkingToMonk
     ) {
@@ -318,7 +445,7 @@ export default function App() {
     // Diamond Way teacher interaction in Diamondway (scene 4)
     if (
       currentScene === 4 &&
-      Math.abs(playerX - DIAMOND_MONK_X) < 80 &&
+      Math.abs(playerX - (DIAMOND_MONK_X + dmOffset)) < 120 &&
       isPressingERef.current &&
       !isTalkingToDiamondMonk
     ) {
@@ -378,12 +505,16 @@ export default function App() {
 
     const responses = [
       [
-        "Buddhism? I think it's about finding calm even when the buses are late.",
-        "I heard Buddhists meditate a lot. Even while waiting for coffee."
+        "Buddhism? Uhh... something about karma, right? And like, not eating meat? I think?",
+        "I'm pretty sure it's about meditating and being really calm all the time. Or maybe that's yoga. I always mix them up.",
+        "My cousin went to Bali and came back really into it. She talks about suffering a lot now. Like, in a positive way somehow.",
+        "Isn't it the one with the fat laughing statue? I rub his belly at the Chinese restaurant for good luck.",
       ],
       [
-        "Probably peacefully. Maybe they smile at strangers and recycle properly.",
-        "I guess they live like everyone else, just with more mindfulness."
+        "Probably just... normally? Maybe with more plants in the apartment. And incense.",
+        "I guess they meditate on their lunch break instead of scrolling their phone? That sounds actually nice.",
+        "No idea honestly. I'd imagine they're just regular people. Maybe a bit calmer when the tram is late.",
+        "They probably eat a lot of rice and avoid drama. That's my Buddhism impression anyway.",
       ]
     ];
 
@@ -409,39 +540,25 @@ export default function App() {
   const maxCameraX = Math.max(0, WORLD_WIDTH - window.innerWidth);
   if (cameraX > maxCameraX) cameraX = maxCameraX;
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-  const playerGroundY = currentScene === 3 ? GROUND_Y + 30 : GROUND_Y;
-  const playerScale = currentScene === 3 ? 1.98 : 1.44;
-=======
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
   // playerGroundY handled inline via y prop offset
   const playerScale = currentScene === 3 ? 1.98 : currentScene === 4 ? 1.44 + (40 / 140) : 1.44;
->>>>>>> Stashed changes
 
   // Press E prompt — world-space X position + label
-  const nearNPC         = currentScene === 1 && Math.abs(playerX - NPC_X) < 80 && !isTalking;
-  const nearNPC1        = currentScene === 1 && Math.abs(playerX - NPC1_X) < 80 && !isTalkingToNPC1;
-  const nearNPC2        = currentScene === 1 && Math.abs(playerX - NPC2_X) < 80 && !isTalkingToNPC2;
-  const nearTemple      = currentScene === 2 && Math.abs(playerX - TEMPLE_DOOR_X) < 80;
-  const nearBus         = currentScene === 1 && Math.abs(playerX - BUS_X) < 80;
-  const nearMonk        = currentScene === 3 && Math.abs(playerX - MONK_X) < 80 && !isTalkingToMonk;
-  const nearDiamondMonk = currentScene === 4 && Math.abs(playerX - DIAMOND_MONK_X) < 80 && !isTalkingToDiamondMonk;
+  const nearNPC         = currentScene === 1 && Math.abs(playerX - (NPC_X + npcOffset)) < 120 && !isTalking;
+  const nearNPC1        = currentScene === 1 && Math.abs(playerX - (NPC1_X + npc1Offset)) < 120 && !isTalkingToNPC1;
+  const nearNPC2        = currentScene === 1 && Math.abs(playerX - (NPC2_X + npc2Offset)) < 120 && !isTalkingToNPC2;
+  const nearTemple      = currentScene === 2 && Math.abs(playerX - TEMPLE_DOOR_X) < 120;
+  const nearBus         = currentScene === 1 && Math.abs(playerX - BUS_X) < 120;
+  const nearMonk        = currentScene === 3 && Math.abs(playerX - (MONK_X + monkOffset)) < 120 && !isTalkingToMonk;
+  const nearDiamondMonk = currentScene === 4 && Math.abs(playerX - (DIAMOND_MONK_X + dmOffset)) < 120 && !isTalkingToDiamondMonk;
   const promptX =
-    nearNPC ? NPC_X :
-    nearNPC1 ? NPC1_X :
-    nearNPC2 ? NPC2_X :
+    nearNPC ? NPC_X + npcOffset :
+    nearNPC1 ? NPC1_X + npc1Offset :
+    nearNPC2 ? NPC2_X + npc2Offset :
     nearTemple ? TEMPLE_DOOR_X :
     nearBus ? BUS_X :
-    nearMonk ? MONK_X :
-    nearDiamondMonk ? DIAMOND_MONK_X : null;
+    nearMonk ? MONK_X + monkOffset :
+    nearDiamondMonk ? DIAMOND_MONK_X + dmOffset : null;
   const promptLabel =
     nearTemple ? "Enter Temple" :
     nearBus ? "Board Bus" :
@@ -476,11 +593,11 @@ export default function App() {
         )}
 
         {currentScene === 1 && <Bus x={BUS_X} />}
-        {currentScene === 1 && <NPC x={NPC_X} />}
-        {currentScene === 1 && <NPC1 x={NPC1_X} />}
-        {currentScene === 1 && <NPC2 x={NPC2_X} />}
-        {currentScene === 3 && <Monk x={MONK_X} />}
-        {currentScene === 4 && <DiamondMonk x={DIAMOND_MONK_X} />}
+        {currentScene === 1 && <NPC x={NPC_X + npcOffset} flipped={npcFlipped} isInteracting={isTalking} />}
+        {currentScene === 1 && <NPC1 x={NPC1_X + npc1Offset} flipped={npc1Flipped} isInteracting={isTalkingToNPC1} />}
+        {currentScene === 1 && <NPC2 x={NPC2_X + npc2Offset} flipped={npc2Flipped} isInteracting={isTalkingToNPC2} />}
+        {currentScene === 3 && <Monk x={MONK_X + monkOffset} flipped={monkFlipped} isInteracting={isTalkingToMonk} />}
+        {currentScene === 4 && <DiamondMonk x={DIAMOND_MONK_X + dmOffset} flipped={dmFlipped} isInteracting={isTalkingToDiamondMonk} />}
 
         {/* Press E prompt — removed from here, rendered in screen space below */}
       </div>
@@ -645,7 +762,8 @@ export default function App() {
       {/* Scene transition video — sits on top of everything */}
       {pendingScene !== null && (
         <SceneTransition
-          videoSrc={TRANSITION_VIDEOS[`${currentScene}-${pendingScene}`] ?? "/sprites/b1.MOV"}
+          fromScene={currentScene}
+          toScene={pendingScene}
           onDone={handleTransitionDone}
         />
       )}
