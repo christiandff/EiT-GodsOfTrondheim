@@ -410,9 +410,12 @@ export default function App() {
   if (cameraX > maxCameraX) cameraX = maxCameraX;
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   const playerGroundY = currentScene === 3 ? GROUND_Y + 30 : GROUND_Y;
   const playerScale = currentScene === 3 ? 1.98 : 1.44;
 =======
+=======
+>>>>>>> Stashed changes
   // playerGroundY handled inline via y prop offset
   const playerScale = currentScene === 3 ? 1.98 : currentScene === 4 ? 1.44 + (40 / 140) : 1.44;
 >>>>>>> Stashed changes
