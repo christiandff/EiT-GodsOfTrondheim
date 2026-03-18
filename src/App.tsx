@@ -548,7 +548,7 @@ export default function App() {
   const maxCameraX = Math.max(0, WORLD_WIDTH - window.innerWidth);
   if (cameraX > maxCameraX) cameraX = maxCameraX;
 
-  const playerGroundY = currentScene === 3 ? GROUND_Y + 30 : GROUND_Y;
+  
   const playerScale = currentScene === 3 ? 1.98 : currentScene === 4 ? 1.44 + (40 / 140) : 1.44;
 
   // Press E prompt — world-space X position + label
