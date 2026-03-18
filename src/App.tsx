@@ -8,6 +8,7 @@ import { Dialog } from "./components/Dialog";
 import { MainMenu } from "./components/MainMenu";
 import { scenes } from "./scenes";
 import { KarmaBar } from "./components/KarmaBar";
+import { MaraFight } from "./components/MaraFight";
 import { PauseMenu } from "./components/PauseMenu";
 import { BreathingMinigame } from "./components/BreathingMinigame";
 import { MeditationMinigame } from "./components/MeditationMinigame";
@@ -76,7 +77,7 @@ export default function App() {
   const NPC_X = 600;
   const NPC1_X = 2050;
   const NPC2_X = 2600;
-  const MONK_X = 1500;
+  const MONK_X = 900;
   const DIAMOND_MONK_X = 600;
 
   // ── NPC patrol state ─────────────────────────────────────
@@ -169,6 +170,7 @@ export default function App() {
   const [showTeaMinigame, setShowTeaMinigame] = useState(false);
   const [showDiamondMinigame, setShowDiamondMinigame] = useState(false);
   const [hasPlayed, setHasPlayed] = useState(false);
+  const [showMaraFight, setShowMaraFight] = useState(false);
   const [reincarnationCount, setReincarnationCount] = useState(0);
   const [isTalkingToMonk, setIsTalkingToMonk] = useState(false);
   const [isTalkingToDiamondMonk, setIsTalkingToDiamondMonk] = useState(false);
@@ -338,6 +340,7 @@ export default function App() {
       if (showTeaMinigameRef.current) return;
       if (showDiamondMinigameRef.current) return;
       if (showFoodTruck) return;
+      if (showMaraFight) return;
       if (pendingSceneRef.current !== null) return;
 
       const keys = keysRef.current;
@@ -669,7 +672,7 @@ export default function App() {
       )}
 
       {currentScene !== 5 && currentScene !== 0 && (
-        <KarmaBar karma={karma} onNirvana={() => setPendingScene(5)} />
+        <KarmaBar karma={karma} onNirvana={() => setShowMaraFight(true)} />
       )}
       {currentScene === 5 && (
         <div style={{
@@ -775,6 +778,14 @@ export default function App() {
       )}
 
       {/* Scene transition video — sits on top of everything */}
+      {showMaraFight && (
+        <MaraFight
+          onVictory={() => { setShowMaraFight(false); setPendingScene(5); }}
+          onDefeat={() => { setShowMaraFight(false); restartGame(); }}
+          skinIndex={reincarnationCount}
+        />
+      )}
+
       {pendingScene !== null && (
         <SceneTransition
           fromScene={currentScene}
