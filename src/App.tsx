@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Player } from "./components/Player";
 import { Bus } from "./components/Bus";
+import { FoodTruck } from "./components/FoodTruck";
+import { FoodTruckDialog } from "./components/FoodTruckDialog";
 import { NPC } from "./components/NPC";
 import { Dialog } from "./components/Dialog";
 import { MainMenu } from "./components/MainMenu";
@@ -69,11 +71,12 @@ export default function App() {
   const [npcResponse, setNpcResponse] = useState<string | null>(null);
 
   const BUS_X = WORLD_WIDTH - 350;
+  const FOODTRUCK_X = 1000; // Scene 1, mellom NPC og NPC1
   const TEMPLE_DOOR_X = WORLD_WIDTH / 2;
   const NPC_X = 600;
-  const NPC1_X = 1400;
+  const NPC1_X = 2050;
   const NPC2_X = 2600;
-  const MONK_X = 800;
+  const MONK_X = 900;
   const DIAMOND_MONK_X = 600;
 
   // ── NPC patrol state ─────────────────────────────────────
@@ -171,6 +174,7 @@ export default function App() {
   const [isTalkingToDiamondMonk, setIsTalkingToDiamondMonk] = useState(false);
   const [isTalkingToNPC1, setIsTalkingToNPC1] = useState(false);
   const [isTalkingToNPC2, setIsTalkingToNPC2] = useState(false);
+  const [showFoodTruck, setShowFoodTruck] = useState(false);
 
   // Keep refs in sync with state
   useEffect(() => { playerYRef.current = playerY; }, [playerY]);
@@ -215,6 +219,9 @@ export default function App() {
     }
     if (scene === 1 && Math.abs(px - BUS_X) < 120) {
       setPlayerX(200); playerXRef.current = 200; goToScene(2);
+    }
+    if (scene === 1 && Math.abs(px - FOODTRUCK_X) < 120 && !showFoodTruck) {
+      setShowFoodTruck(true);
     }
     if (scene === 2 && Math.abs(px - TEMPLE_DOOR_X) < 120) {
       setPlayerX(200); playerXRef.current = 200; goToScene(3);
@@ -330,6 +337,7 @@ export default function App() {
       if (isTalkingToNPC2Ref.current) return;
       if (showTeaMinigameRef.current) return;
       if (showDiamondMinigameRef.current) return;
+      if (showFoodTruck) return;
       if (pendingSceneRef.current !== null) return;
 
       const keys = keysRef.current;
@@ -549,6 +557,7 @@ export default function App() {
   const nearNPC2        = currentScene === 1 && Math.abs(playerX - (NPC2_X + npc2Offset)) < 120 && !isTalkingToNPC2;
   const nearTemple      = currentScene === 2 && Math.abs(playerX - TEMPLE_DOOR_X) < 120;
   const nearBus         = currentScene === 1 && Math.abs(playerX - BUS_X) < 120;
+  const nearFoodTruck   = currentScene === 1 && Math.abs(playerX - FOODTRUCK_X) < 120 && !showFoodTruck;
   const nearMonk        = currentScene === 3 && Math.abs(playerX - (MONK_X + monkOffset)) < 120 && !isTalkingToMonk;
   const nearDiamondMonk = currentScene === 4 && Math.abs(playerX - (DIAMOND_MONK_X + dmOffset)) < 120 && !isTalkingToDiamondMonk;
   const promptX =
@@ -557,11 +566,13 @@ export default function App() {
     nearNPC2 ? NPC2_X + npc2Offset :
     nearTemple ? TEMPLE_DOOR_X :
     nearBus ? BUS_X :
+    nearFoodTruck ? FOODTRUCK_X :
     nearMonk ? MONK_X + monkOffset :
     nearDiamondMonk ? DIAMOND_MONK_X + dmOffset : null;
   const promptLabel =
     nearTemple ? "Enter Temple" :
     nearBus ? "Board Bus" :
+    nearFoodTruck ? "Order Food" :
     nearMonk ? "Speak with Monk" :
     nearDiamondMonk ? "Speak with Teacher" : "Talk";
 
@@ -593,6 +604,7 @@ export default function App() {
         )}
 
         {currentScene === 1 && <Bus x={BUS_X} />}
+        {currentScene === 1 && <FoodTruck x={FOODTRUCK_X} />}
         {currentScene === 1 && <NPC x={NPC_X + npcOffset} flipped={npcFlipped} isInteracting={isTalking} />}
         {currentScene === 1 && <NPC1 x={NPC1_X + npc1Offset} flipped={npc1Flipped} isInteracting={isTalkingToNPC1} />}
         {currentScene === 1 && <NPC2 x={NPC2_X + npc2Offset} flipped={npc2Flipped} isInteracting={isTalkingToNPC2} />}
@@ -748,6 +760,9 @@ export default function App() {
       )}
       {isTalkingToNPC2 && currentScene === 1 && (
         <NPC2Dialog onClose={() => setIsTalkingToNPC2(false)} onKarma={() => setKarma(prev => Math.min(prev + 5, 100))} />
+      )}
+      {showFoodTruck && currentScene === 1 && (
+        <FoodTruckDialog onClose={() => setShowFoodTruck(false)} />
       )}
       {showMinigame && (
         <BreathingMinigame onComplete={handleMinigameComplete} onClose={handleMinigameClose} />
