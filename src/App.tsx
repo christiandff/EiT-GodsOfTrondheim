@@ -76,7 +76,7 @@ export default function App() {
   const NPC_X = 600;
   const NPC1_X = 2050;
   const NPC2_X = 2600;
-  const MONK_X = 900;
+  const MONK_X = 1500;
   const DIAMOND_MONK_X = 600;
 
   // ── NPC patrol state ─────────────────────────────────────
