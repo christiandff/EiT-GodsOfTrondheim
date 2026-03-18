@@ -1,21 +1,10 @@
-type MonkProps = {
-  x: number;
-};
-
-export function Monk({ x }: MonkProps) {
+type MonkProps = { x: number; flipped: boolean; isInteracting: boolean };
+export function Monk({ x, flipped }: MonkProps) {
   return (
-    <img
-      src="/sprites/monk_idle.png"
-      alt="Monk"
-      style={{
-        position: "absolute",
-        bottom: "40px",
-        left: x,
-        width: "260px",
-        height: "260px",
-        imageRendering: "pixelated",
-        zIndex: 2 // ligger bak player, men foran bakgrunn
-      }}
-    />
+    <img src="/sprites/monk_idle.png" alt="Monk" style={{
+      position: "absolute", bottom: "40px", left: x,
+      width: "260px", height: "260px", imageRendering: "pixelated",
+      zIndex: 2, transform: flipped ? "scaleX(-1)" : "scaleX(1)",
+    }} />
   );
 }
