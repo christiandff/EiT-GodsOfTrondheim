@@ -10,10 +10,10 @@ type PlayerProps = {
 const SKINS = [
   "/sprites/player_idle.png",
   "/sprites/player_idle1.png",
-  "/sprites/player_idle2.png",
+  "/sprites/player_idle5.png",
   "/sprites/player_idle3.png",
   "/sprites/player_idle4.png",
-  "/sprites/player_idle5.png",
+  "/sprites/player_idle2.png",
 ];
 
 export function Player({ x, y, scale, facing, skinIndex }: PlayerProps) {
