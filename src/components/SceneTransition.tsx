@@ -60,6 +60,18 @@ export function SceneTransition({ fromScene, toScene, onDone }: SceneTransitionP
     setDone(true);
   }
 
+  // Enter key: skip typing or continue when done
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Enter") {
+        if (!done) handleSkip();
+        else onDone();
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [done]);
+
   // Render \n as line breaks
   const lines = displayed.split("\n");
 

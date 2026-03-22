@@ -255,10 +255,10 @@ export function MaraFight({ onVictory, onDefeat, skinIndex }: MaraFightProps) {
     return (
       <div style={overlay}>
         <div style={dialogBox}>
-          {/* Mara image */}
-          <img src="/sprites/mara.png" style={{
+          {/* Speaker image */}
+          <img src={line.speaker === "MARA" ? "/sprites/mara.png" : SKINS[skinIndex % SKINS.length]} style={{
             width: 120, height: 120, imageRendering: "pixelated",
-            marginBottom: 16, filter: "drop-shadow(0 0 16px #ff440088)",
+            marginBottom: 16, filter: line.speaker === "MARA" ? "drop-shadow(0 0 16px #ff440088)" : "drop-shadow(0 0 16px #55aaff88)",
           }} />
 
           <div style={{ fontSize: 9, color: line.speaker === "MARA" ? "#ff6644" : "#55aaff", letterSpacing: 2, marginBottom: 12 }}>

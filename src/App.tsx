@@ -185,11 +185,11 @@ export default function App() {
   useEffect(() => { isPausedRef.current = isPaused; }, [isPaused]);
   useEffect(() => { pendingSceneRef.current = pendingScene; }, [pendingScene]);
   useEffect(() => { currentSceneRef.current = currentScene; }, [currentScene]);
-  useEffect(() => { npcOffsetRef.current  = npcOffset;  }, [npcOffset]);
-  useEffect(() => { npc1OffsetRef.current = npc1Offset; }, [npc1Offset]);
-  useEffect(() => { npc2OffsetRef.current = npc2Offset; }, [npc2Offset]);
-  useEffect(() => { monkOffsetRef.current = monkOffset; }, [monkOffset]);
-  useEffect(() => { dmOffsetRef.current   = dmOffset;   }, [dmOffset]);
+  npcOffsetRef.current  = npcOffset;
+  npc1OffsetRef.current = npc1Offset;
+  npc2OffsetRef.current = npc2Offset;
+  monkOffsetRef.current = monkOffset;
+  dmOffsetRef.current   = dmOffset;
   useEffect(() => { isTalkingToMonkRef.current = isTalkingToMonk; }, [isTalkingToMonk]);
   useEffect(() => { isTalkingToDiamondMonkRef.current = isTalkingToDiamondMonk; }, [isTalkingToDiamondMonk]);
   useEffect(() => { isTalkingToNPC1Ref.current = isTalkingToNPC1; }, [isTalkingToNPC1]);
@@ -205,36 +205,38 @@ export default function App() {
   useEffect(() => { showDiamondMinigameRef.current = showDiamondMinigame; }, [showDiamondMinigame]);
 
   // Called immediately when E is pressed — uses refs so it's never stale
-  function triggerInteraction() {
+  const triggerInteractionRef = useRef<() => void>(() => {});
+  triggerInteractionRef.current = () => {
     const px = playerXRef.current;
     const scene = currentSceneRef.current;
     if (scene === 5) return;
 
-    if (scene === 1 && Math.abs(px - (NPC_X + npcOffsetRef.current)) < 120 && !isTalkingRef.current) {
+    const R = 150; // interaction radius — slightly larger than prompt radius for reliability
+    if (scene === 1 && Math.abs(px - (NPC_X + npcOffsetRef.current)) < R && !isTalkingRef.current) {
       setIsTalking(true); setQuestionSelected(null); setNpcResponse(null);
     }
-    if (scene === 1 && Math.abs(px - (NPC1_X + npc1OffsetRef.current)) < 120 && !isTalkingToNPC1Ref.current) {
+    if (scene === 1 && Math.abs(px - (NPC1_X + npc1OffsetRef.current)) < R && !isTalkingToNPC1Ref.current) {
       setIsTalkingToNPC1(true);
     }
-    if (scene === 1 && Math.abs(px - (NPC2_X + npc2OffsetRef.current)) < 120 && !isTalkingToNPC2Ref.current) {
+    if (scene === 1 && Math.abs(px - (NPC2_X + npc2OffsetRef.current)) < R && !isTalkingToNPC2Ref.current) {
       setIsTalkingToNPC2(true);
     }
-    if (scene === 1 && Math.abs(px - BUS_X) < 120) {
+    if (scene === 1 && Math.abs(px - BUS_X) < R) {
       setPlayerX(200); playerXRef.current = 200; goToScene(2);
     }
-    if (scene === 1 && Math.abs(px - FOODTRUCK_X) < 120 && !showFoodTruck) {
+    if (scene === 1 && Math.abs(px - FOODTRUCK_X) < R && !showFoodTruck) {
       setShowFoodTruck(true);
     }
-    if (scene === 2 && Math.abs(px - TEMPLE_DOOR_X) < 120) {
+    if (scene === 2 && Math.abs(px - TEMPLE_DOOR_X) < R) {
       setPlayerX(200); playerXRef.current = 200; goToScene(3);
     }
-    if (scene === 3 && Math.abs(px - (MONK_X + monkOffsetRef.current)) < 120 && !isTalkingToMonkRef.current) {
+    if (scene === 3 && Math.abs(px - (MONK_X + monkOffsetRef.current)) < R && !isTalkingToMonkRef.current) {
       setIsTalkingToMonk(true); setKarma(prev => Math.min(prev + 10, 100));
     }
-    if (scene === 4 && Math.abs(px - (DIAMOND_MONK_X + dmOffsetRef.current)) < 120 && !isTalkingToDiamondMonkRef.current) {
+    if (scene === 4 && Math.abs(px - (DIAMOND_MONK_X + dmOffsetRef.current)) < R && !isTalkingToDiamondMonkRef.current) {
       setIsTalkingToDiamondMonk(true); setKarma(prev => Math.min(prev + 10, 100));
     }
-  }
+  };
 
   function startGame() {
     setPlayerX(200);
@@ -299,7 +301,7 @@ export default function App() {
       if (e.key === "e" || e.key === "E") {
         isPressingERef.current = true;
         // Trigger interaction immediately on keydown — don't wait for playerX to change
-        triggerInteraction();
+        triggerInteractionRef.current();
       }
     }
     function onKeyUp(e: KeyboardEvent) {
@@ -378,28 +380,10 @@ export default function App() {
     return () => clearInterval(loop);
   }, [currentScene, WORLD_WIDTH]);
 
-  // Scene switching + NPC interaction
+  // Scene switching (automatic, no E required)
   useEffect(() => {
     if (pendingScene !== null) return; // don't trigger while transition is playing
     if (currentScene === 5) return; // nirvana is locked
-
-    if (
-      currentScene === 1 &&
-      Math.abs(playerX - BUS_X) < 120 &&
-      isPressingERef.current
-    ) {
-      setPlayerX(200);
-      goToScene(2);
-    }
-
-    if (
-      currentScene === 2 &&
-      Math.abs(playerX - TEMPLE_DOOR_X) < 120 &&
-      isPressingERef.current
-    ) {
-      setPlayerX(200);
-      goToScene(3);
-    }
 
     // TempleInside → Diamondway (walk to far right edge)
     if (currentScene === 3 && playerX >= WORLD_WIDTH - PLAYER_WIDTH - 10) {
@@ -412,58 +396,7 @@ export default function App() {
       setCurrentScene(3);
       setPlayerX(WORLD_WIDTH - PLAYER_WIDTH - 20);
     }
-
-    if (
-      currentScene === 1 &&
-      Math.abs(playerX - (NPC_X + npcOffset)) < 120 &&
-      isPressingERef.current &&
-      !isTalking
-    ) {
-      setIsTalking(true);
-      setQuestionSelected(null);
-      setNpcResponse(null);
-    }
-
-    if (
-      currentScene === 1 &&
-      Math.abs(playerX - (NPC1_X + npc1Offset)) < 120 &&
-      isPressingERef.current &&
-      !isTalkingToNPC1
-    ) {
-      setIsTalkingToNPC1(true);
-    }
-
-    if (
-      currentScene === 1 &&
-      Math.abs(playerX - (NPC2_X + npc2Offset)) < 120 &&
-      isPressingERef.current &&
-      !isTalkingToNPC2
-    ) {
-      setIsTalkingToNPC2(true);
-    }
-
-    // Monk interaction in TempleInside (scene 3)
-    if (
-      currentScene === 3 &&
-      Math.abs(playerX - (MONK_X + monkOffset)) < 120 &&
-      isPressingERef.current &&
-      !isTalkingToMonk
-    ) {
-      setIsTalkingToMonk(true);
-      setKarma(prev => Math.min(prev + 10, 100));
-    }
-
-    // Diamond Way teacher interaction in Diamondway (scene 4)
-    if (
-      currentScene === 4 &&
-      Math.abs(playerX - (DIAMOND_MONK_X + dmOffset)) < 120 &&
-      isPressingERef.current &&
-      !isTalkingToDiamondMonk
-    ) {
-      setIsTalkingToDiamondMonk(true);
-      setKarma(prev => Math.min(prev + 10, 100));
-    }
-  }, [playerX, currentScene, pendingScene, isTalking, isTalkingToMonk, isTalkingToDiamondMonk, isTalkingToNPC1, isTalkingToNPC2]);
+  }, [playerX, currentScene, pendingScene]);
 
   function handleMeditate() {
     setIsTalking(false);
@@ -546,10 +479,13 @@ export default function App() {
   }
 
   // Camera
-  let cameraX = playerX - window.innerWidth / 2;
-  if (cameraX < 0) cameraX = 0;
-  const maxCameraX = Math.max(0, WORLD_WIDTH - window.innerWidth);
-  if (cameraX > maxCameraX) cameraX = maxCameraX;
+  let cameraX = 0;
+  if (currentScene !== 5) {
+    cameraX = playerX - window.innerWidth / 2;
+    if (cameraX < 0) cameraX = 0;
+    const maxCameraX = Math.max(0, WORLD_WIDTH - window.innerWidth);
+    if (cameraX > maxCameraX) cameraX = maxCameraX;
+  }
 
   
   const playerScale = currentScene === 3 ? 1.98 : currentScene === 4 ? 1.44 + (40 / 140) : 1.44;
@@ -590,9 +526,9 @@ export default function App() {
           width: WORLD_WIDTH,
           height: "100vh",
           backgroundImage: `url(${scene.background})`,
-          backgroundSize: currentScene === 4 ? "cover" : `${WORLD_WIDTH}px 100%`,
+          backgroundSize: currentScene === 4 || currentScene === 5 ? "cover" : `${WORLD_WIDTH}px 100%`,
           backgroundRepeat: "no-repeat",
-          backgroundPosition: currentScene === 4 ? "center center" : "top left"
+          backgroundPosition: currentScene === 4 || currentScene === 5 ? "center center" : "top left"
         }}
       >
         {currentScene !== 0 && currentScene !== 5 && (
@@ -671,7 +607,7 @@ export default function App() {
         />
       )}
 
-      {currentScene !== 5 && currentScene !== 0 && (
+      {currentScene !== 5 && currentScene !== 0 && !showMaraFight && pendingScene === null && (
         <KarmaBar karma={karma} onNirvana={() => setShowMaraFight(true)} />
       )}
       {currentScene === 5 && (
