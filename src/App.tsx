@@ -22,6 +22,7 @@ import { NPC2 } from "./components/NPC2";
 import { NPC1Dialog } from "./components/NPC1Dialog";
 import { NPC2Dialog } from "./components/NPC2Dialog";
 import { SceneTransition } from "./components/SceneTransition";
+import { bgMusic } from "./bgMusic";
 
 // All transition texts are defined inside SceneTransition.tsx
 
@@ -177,6 +178,12 @@ export default function App() {
   const [isTalkingToNPC1, setIsTalkingToNPC1] = useState(false);
   const [isTalkingToNPC2, setIsTalkingToNPC2] = useState(false);
   const [showFoodTruck, setShowFoodTruck] = useState(false);
+
+  // ── Background music (loop forever) ──
+  useEffect(() => {
+    bgMusic.play().catch(() => {});
+    return () => { bgMusic.pause(); };
+  }, []);
 
   // Keep refs in sync with state
   useEffect(() => { playerYRef.current = playerY; }, [playerY]);

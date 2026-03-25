@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { dimMusic, restoreMusic } from "../bgMusic";
 
 type FoodTruckDialogProps = {
   onClose: () => void;
@@ -17,15 +18,18 @@ export function FoodTruckDialog({ onClose }: FoodTruckDialogProps) {
   function handleSelect(index: number) {
     setResponse(QUESTIONS[index]);
     setShowVideo(true);
+    dimMusic();
   }
 
   function handleVideoEnded() {
     setShowVideo(false);
+    restoreMusic();
   }
 
   function handleBack() {
     setResponse(null);
     setShowVideo(false);
+    restoreMusic();
   }
 
   // ── Video overlay ──────────────────────────────────────
@@ -73,7 +77,7 @@ export function FoodTruckDialog({ onClose }: FoodTruckDialogProps) {
 
       {/* Body */}
       <div style={{ marginBottom: 16, fontSize: 10, color: "#ffe8bb", lineHeight: 2.2 }}>
-        {response ? `You asked: "${response}"` : "Yeah? What do you want?"}
+        {response ? "" : "Yeah? What do you want?"}
       </div>
 
       {/* Questions */}

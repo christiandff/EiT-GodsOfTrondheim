@@ -10,6 +10,12 @@ const TRANSITION_TEXTS: Record<string, string> = {
   "3-4": `My conversation with the monk was both inspiring and enlightening. We shared tea and talked about how the Buddhist lifestyle can adapt to different people and places. The visit left a strong impression on me.\n\nNow I'm returning to Trondheim to visit another Buddhist center: Diamond Way. There, I'll meet a practitioner who will explain how he lives with Buddhism in his daily life, and how they build connections with the community.`,
 
   "4-5": `I have now spoken with everyday people, a monk, and a Diamond Way Buddhist. Each of them has taught me something different, and my journey as a seeker of Buddhist understanding feels complete.\n\nI began with little knowledge, but step by step I have uncovered insight — perhaps even a glimpse of nirvana. Now I face a simple but profound choice: remain in this state of enlightenment, or return to the world as a bodhisattva.`,
+
+  "1-5": `After defeating Mara, the world around me begins to shift. The busy streets of Trondheim grow quiet, and a warm golden light fills the air.\n\nI have walked this path from curiosity to understanding, and now the final door opens before me. Nirvana awaits.`,
+
+  "2-5": `Mara has fallen. Standing outside the temple, I feel a deep stillness wash over me. The journey that began with questions has led to something I never expected.\n\nThe path to Nirvana is clear. I take my final steps forward.`,
+
+  "3-5": `With Mara defeated within the temple walls, a golden glow fills the room. The monk's teachings, the tea, the patience — it all led to this moment.\n\nNirvana is no longer just a word. It is here, now, waiting.`,
 };
 
 const FALLBACK_TEXT = "Loading next chapter...";

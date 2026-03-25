@@ -1,12 +1,32 @@
+import { useState, useEffect, useRef } from "react";
+
 type KarmaBarProps = {
   karma: number;
   onNirvana?: () => void;
 };
 
+type FloatingText = { id: number; amount: number };
+
 export function KarmaBar({ karma, onNirvana }: KarmaBarProps) {
   const maxKarma = 100;
   const percent = Math.min(karma, maxKarma);
   const isMax = percent >= 100;
+
+  const prevKarma = useRef(karma);
+  const [floats, setFloats] = useState<FloatingText[]>([]);
+  const floatId = useRef(0);
+
+  useEffect(() => {
+    const diff = karma - prevKarma.current;
+    prevKarma.current = karma;
+    if (diff > 0) {
+      const id = floatId.current++;
+      setFloats(prev => [...prev, { id, amount: diff }]);
+      setTimeout(() => {
+        setFloats(prev => prev.filter(f => f.id !== id));
+      }, 1500);
+    }
+  }, [karma]);
 
   return (
     <div style={{
@@ -80,7 +100,30 @@ export function KarmaBar({ karma, onNirvana }: KarmaBarProps) {
         </button>
       )}
 
+      {/* Floating karma gain text */}
+      {floats.map(f => (
+        <div key={f.id} style={{
+          position: "absolute",
+          top: 20,
+          right: 230,
+          fontFamily: "'Press Start 2P', monospace",
+          fontSize: 20,
+          color: "#00ff88",
+          textShadow: "0 0 12px #00ff88, 0 0 24px #00ff88aa, 2px 2px 0 #000",
+          animation: "karma-float 1.5s ease-out forwards",
+          pointerEvents: "none",
+          zIndex: 1001,
+        }}>
+          +{f.amount}
+        </div>
+      ))}
+
       <style>{`
+        @keyframes karma-float {
+          0% { opacity: 1; transform: translateY(0) scale(1); }
+          50% { opacity: 1; transform: translateY(-30px) scale(1.2); }
+          100% { opacity: 0; transform: translateY(-60px) scale(0.8); }
+        }
         @keyframes karma-glow {
           from { box-shadow: 0 0 16px #00ff88, 0 0 40px #00ff88aa; }
           to   { box-shadow: 0 0 30px #00ff88, 0 0 80px #00ff88cc; }

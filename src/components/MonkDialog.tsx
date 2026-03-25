@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { dimMusic, restoreMusic } from "../bgMusic";
 
 type MonkDialogProps = {
   onClose: () => void;
@@ -52,6 +53,7 @@ export function MonkDialog({ onClose, onTeaMinigame }: MonkDialogProps) {
     if (q.video) {
       setVideoSrc(`/sprites/${q.video}`);
       setShowVideo(true);
+      dimMusic();
     } else {
       const random = Math.floor(Math.random() * q.responses.length);
       setResponse(q.responses[random]);
@@ -61,6 +63,7 @@ export function MonkDialog({ onClose, onTeaMinigame }: MonkDialogProps) {
   function handleVideoEnded() {
     setShowVideo(false);
     setVideoSrc(null);
+    restoreMusic();
     // After video, show a text response too
     if (selectedIndex !== null) {
       const q = MONK_QUESTIONS[selectedIndex];
@@ -74,6 +77,7 @@ export function MonkDialog({ onClose, onTeaMinigame }: MonkDialogProps) {
     setResponse(null);
     setShowVideo(false);
     setVideoSrc(null);
+    restoreMusic();
   }
 
   // ── Video overlay ────────────────────────────────────

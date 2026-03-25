@@ -45,7 +45,7 @@ type Ball = Vec2 & { id: number; vx: number; vy: number };
 
 export function MaraFight({ onVictory, onDefeat, skinIndex }: MaraFightProps) {
   // ── Phase state ───────────────────────────────────────
-  const [phase, setPhase] = useState<"dialog" | "fight" | "victory" | "defeat">("dialog");
+  const [phase, setPhase] = useState<"dialog" | "instructions" | "fight" | "victory" | "defeat">("dialog");
   const [dialogIdx, setDialogIdx] = useState(0);
 
   // ── Fight state ───────────────────────────────────────
@@ -79,7 +79,7 @@ export function MaraFight({ onVictory, onDefeat, skinIndex }: MaraFightProps) {
   const playerHpRef   = useRef(PLAYER_MAX_HP);
   const invincibleRef = useRef(false);
   const ballIdRef     = useRef(0);
-  const phaseRef      = useRef<"dialog" | "fight" | "victory" | "defeat">("dialog");
+  const phaseRef      = useRef<"dialog" | "instructions" | "fight" | "victory" | "defeat">("dialog");
 
   // Sync refs
   karmaBallsRef.current = karmaBalls;
@@ -270,12 +270,68 @@ export function MaraFight({ onVictory, onDefeat, skinIndex }: MaraFightProps) {
 
           <button
             onClick={() => {
-              if (isLast) setPhase("fight");
+              if (isLast) setPhase("instructions");
               else setDialogIdx(i => i + 1);
             }}
             style={btnStyle("#ff6644", "#aa2200")}
           >
-            {isLast ? "⚔ FIGHT" : "NEXT ▶"}
+            {isLast ? "NEXT ▶" : "NEXT ▶"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Instructions phase ──────────────────────────────────
+  if (phase === "instructions") {
+    return (
+      <div style={overlay}>
+        <div style={dialogBox}>
+          <div style={{ fontSize: 16, color: "#ffdd55", textShadow: "0 0 16px #ffdd55", marginBottom: 32 }}>
+            ⚔ HOW TO FIGHT ⚔
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 20, marginBottom: 32 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+              <div style={{
+                background: "#223", border: "2px solid #556", padding: "8px 16px",
+                fontFamily: "'Press Start 2P', monospace", fontSize: 14, color: "#fff",
+                minWidth: 60, textAlign: "center",
+              }}>A / D</div>
+              <div style={{ fontSize: 10, color: "#ccddff", lineHeight: 1.8 }}>Move left and right</div>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+              <div style={{
+                background: "#223", border: "2px solid #556", padding: "8px 16px",
+                fontFamily: "'Press Start 2P', monospace", fontSize: 14, color: "#fff",
+                minWidth: 60, textAlign: "center",
+              }}>SPACE</div>
+              <div style={{ fontSize: 10, color: "#ccddff", lineHeight: 1.8 }}>Jump to dodge Mara's attacks</div>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+              <div style={{
+                background: "#113322", border: "2px solid #00ff88", padding: "8px 16px",
+                fontFamily: "'Press Start 2P', monospace", fontSize: 14, color: "#00ff88",
+                minWidth: 60, textAlign: "center",
+                boxShadow: "0 0 12px #00ff8844",
+              }}>R</div>
+              <div style={{ fontSize: 12, color: "#00ff88", lineHeight: 1.8, textShadow: "0 0 8px #00ff8866" }}>
+                Shoot karma balls at Mara!
+              </div>
+            </div>
+          </div>
+
+          <div style={{ fontSize: 8, color: "#887766", lineHeight: 2, textAlign: "center", marginBottom: 24 }}>
+            Dodge the red orbs, shoot Mara with R, and survive!
+          </div>
+
+          <button
+            onClick={() => setPhase("fight")}
+            style={btnStyle("#ff6644", "#aa2200")}
+          >
+            ⚔ FIGHT
           </button>
         </div>
       </div>

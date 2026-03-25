@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { dimMusic, restoreMusic } from "../bgMusic";
 
 type DiamondMonkDialogProps = {
   onClose: () => void;
@@ -50,6 +51,7 @@ export function DiamondMonkDialog({ onClose, onMeditationMinigame }: DiamondMonk
     if (q.video) {
       setVideoSrc(`/sprites/${q.video}`);
       setShowVideo(true);
+      dimMusic();
     } else {
       const random = Math.floor(Math.random() * q.responses.length);
       setResponse(q.responses[random]);
@@ -59,6 +61,7 @@ export function DiamondMonkDialog({ onClose, onMeditationMinigame }: DiamondMonk
   function handleVideoEnded() {
     setShowVideo(false);
     setVideoSrc(null);
+    restoreMusic();
     if (selectedIndex !== null) {
       const q = DIAMOND_QUESTIONS[selectedIndex];
       const random = Math.floor(Math.random() * q.responses.length);
@@ -71,6 +74,7 @@ export function DiamondMonkDialog({ onClose, onMeditationMinigame }: DiamondMonk
     setResponse(null);
     setShowVideo(false);
     setVideoSrc(null);
+    restoreMusic();
   }
 
   // ── Video overlay ────────────────────────────────────
