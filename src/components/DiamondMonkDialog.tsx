@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { dimMusic, muteMusic, restoreMusic } from "../bgMusic";
+import { dimMusic, muteMusic } from "../bgMusic";
 
 type DiamondMonkDialogProps = {
   onClose: () => void;
