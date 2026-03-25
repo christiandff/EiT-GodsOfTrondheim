@@ -634,7 +634,7 @@ export default function App() {
 
           {/* Bodhisattva — restart and play again */}
           <button
-            onClick={restartGame}
+            onClick={() => { restartGame(); startGame(); }}
             style={{
               fontFamily: "'Press Start 2P', monospace",
               fontSize: 16,

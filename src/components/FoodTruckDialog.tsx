@@ -23,6 +23,7 @@ export function FoodTruckDialog({ onClose }: FoodTruckDialogProps) {
 
   function handleVideoEnded() {
     setShowVideo(false);
+    setResponse(null);
     restoreMusic();
   }
 
