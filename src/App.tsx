@@ -179,11 +179,7 @@ export default function App() {
   const [isTalkingToNPC2, setIsTalkingToNPC2] = useState(false);
   const [showFoodTruck, setShowFoodTruck] = useState(false);
 
-  // ── Background music (loop forever) ──
-  useEffect(() => {
-    bgMusic.play().catch(() => {});
-    return () => { bgMusic.pause(); };
-  }, []);
+  // ── Background music (loop forever, started on first user interaction) ──
 
   // Keep refs in sync with state
   useEffect(() => { playerYRef.current = playerY; }, [playerY]);
@@ -246,6 +242,7 @@ export default function App() {
   };
 
   function startGame() {
+    bgMusic.play().catch(() => {});
     setPlayerX(200);
     playerXRef.current = 200;
     setHasPlayed(true);

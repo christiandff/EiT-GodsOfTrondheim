@@ -16,6 +16,7 @@ const KARMA_REWARD = 20;
 // How close the player's timing needs to be (0–1 scale) to count as "good"
 
 
+
 export function BreathingMinigame({ onComplete, onClose }: BreathingMinigameProps) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [round, setRound] = useState(0);
