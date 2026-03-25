@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { dimMusic, restoreMusic } from "../bgMusic";
+import { dimMusic, muteMusic, restoreMusic } from "../bgMusic";
 
 type FoodTruckDialogProps = {
   onClose: () => void;
@@ -7,30 +7,38 @@ type FoodTruckDialogProps = {
 
 const QUESTIONS = [
   "What do you associate with the word Buddhism?",
-  "What do you think about Buddha?",
-  "How do you think Buddhists live in Trondheim?",
+  "What do you think buddhists are like?",
+  "Who was Buddha?",
+];
+
+const VIDEOS = [
+  "/sprites/burgerman1.mp4",
+  "/sprites/burgerman2.mp4",
+  "/sprites/burgerman3.mp4",
 ];
 
 export function FoodTruckDialog({ onClose }: FoodTruckDialogProps) {
   const [showVideo, setShowVideo] = useState(false);
   const [response, setResponse] = useState<string | null>(null);
+  const [videoSrc, setVideoSrc] = useState<string>("");
 
   function handleSelect(index: number) {
     setResponse(QUESTIONS[index]);
+    setVideoSrc(VIDEOS[index]);
     setShowVideo(true);
-    dimMusic();
+    muteMusic();
   }
 
   function handleVideoEnded() {
     setShowVideo(false);
     setResponse(null);
-    restoreMusic();
+    dimMusic();
   }
 
   function handleBack() {
     setResponse(null);
     setShowVideo(false);
-    restoreMusic();
+    dimMusic();
   }
 
   // ── Video overlay ──────────────────────────────────────
@@ -42,7 +50,7 @@ export function FoodTruckDialog({ onClose }: FoodTruckDialogProps) {
         background: "rgba(0,0,0,0.92)",
       }}>
         <video
-          src="/sprites/b1.MOV"
+          src={videoSrc}
           autoPlay
           onEnded={handleVideoEnded}
           style={{

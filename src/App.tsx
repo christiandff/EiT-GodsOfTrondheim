@@ -22,7 +22,7 @@ import { NPC2 } from "./components/NPC2";
 import { NPC1Dialog } from "./components/NPC1Dialog";
 import { NPC2Dialog } from "./components/NPC2Dialog";
 import { SceneTransition } from "./components/SceneTransition";
-import { bgMusic } from "./bgMusic";
+import { bgMusic, dimMusic, restoreMusic } from "./bgMusic";
 
 // All transition texts are defined inside SceneTransition.tsx
 
@@ -228,16 +228,16 @@ export default function App() {
       setPlayerX(200); playerXRef.current = 200; goToScene(2);
     }
     if (scene === 1 && Math.abs(px - FOODTRUCK_X) < R && !showFoodTruck) {
-      setShowFoodTruck(true);
+      setShowFoodTruck(true); dimMusic();
     }
     if (scene === 2 && Math.abs(px - TEMPLE_DOOR_X) < R) {
       setPlayerX(200); playerXRef.current = 200; goToScene(3);
     }
     if (scene === 3 && Math.abs(px - (MONK_X + monkOffsetRef.current)) < R && !isTalkingToMonkRef.current) {
-      setIsTalkingToMonk(true); setKarma(prev => Math.min(prev + 10, 100));
+      setIsTalkingToMonk(true); setKarma(prev => Math.min(prev + 10, 100)); dimMusic();
     }
     if (scene === 4 && Math.abs(px - (DIAMOND_MONK_X + dmOffsetRef.current)) < R && !isTalkingToDiamondMonkRef.current) {
-      setIsTalkingToDiamondMonk(true); setKarma(prev => Math.min(prev + 10, 100));
+      setIsTalkingToDiamondMonk(true); setKarma(prev => Math.min(prev + 10, 100)); dimMusic();
     }
   };
 
@@ -693,10 +693,10 @@ export default function App() {
       )}
       {isPaused && <PauseMenu onResume={() => setIsPaused(false)} onRestart={restartGame} onMenu={() => { setIsPaused(false); setCurrentScene(0); setKarma(0); }} />}
       {isTalkingToMonk && currentScene === 3 && (
-        <MonkDialog onClose={() => setIsTalkingToMonk(false)} onTeaMinigame={handleTeaMinigame} />
+        <MonkDialog onClose={() => { setIsTalkingToMonk(false); restoreMusic(); }} onTeaMinigame={handleTeaMinigame} />
       )}
       {isTalkingToDiamondMonk && currentScene === 4 && (
-        <DiamondMonkDialog onClose={() => setIsTalkingToDiamondMonk(false)} onMeditationMinigame={handleDiamondMinigame} />
+        <DiamondMonkDialog onClose={() => { setIsTalkingToDiamondMonk(false); restoreMusic(); }} onMeditationMinigame={handleDiamondMinigame} />
       )}
       {isTalkingToNPC1 && currentScene === 1 && (
         <NPC1Dialog onClose={() => setIsTalkingToNPC1(false)} onKarma={() => setKarma(prev => Math.min(prev + 5, 100))} />
@@ -705,7 +705,7 @@ export default function App() {
         <NPC2Dialog onClose={() => setIsTalkingToNPC2(false)} onKarma={() => setKarma(prev => Math.min(prev + 5, 100))} />
       )}
       {showFoodTruck && currentScene === 1 && (
-        <FoodTruckDialog onClose={() => setShowFoodTruck(false)} />
+        <FoodTruckDialog onClose={() => { setShowFoodTruck(false); restoreMusic(); }} />
       )}
       {showMinigame && (
         <BreathingMinigame onComplete={handleMinigameComplete} onClose={handleMinigameClose} />

@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { bgMusic } from "../bgMusic";
+
 type PauseMenuProps = {
   onResume: () => void;
   onRestart: () => void;
@@ -5,6 +8,12 @@ type PauseMenuProps = {
 };
 
 export function PauseMenu({ onResume, onRestart, onMenu }: PauseMenuProps) {
+  const [muted, setMuted] = useState(bgMusic.muted);
+
+  function toggleMute() {
+    bgMusic.muted = !bgMusic.muted;
+    setMuted(bgMusic.muted);
+  }
   return (
     <div style={{
       position: "absolute",
@@ -139,6 +148,23 @@ export function PauseMenu({ onResume, onRestart, onMenu }: PauseMenuProps) {
           }}
         >
           ☸ REINCARNATE
+        </button>
+
+        <button
+          onClick={toggleMute}
+          style={{
+            fontFamily: "'Press Start 2P', monospace",
+            fontSize: 12,
+            color: muted ? "#aa6644" : "#aaccff",
+            background: "transparent",
+            border: `2px solid ${muted ? "#aa6644" : "#334466"}`,
+            padding: "10px 24px",
+            cursor: "pointer",
+            letterSpacing: 2,
+            marginTop: 8,
+          }}
+        >
+          {muted ? "♪ UNMUTE" : "♪ MUTE"}
         </button>
       </div>
     </div>
