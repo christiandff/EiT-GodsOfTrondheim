@@ -6,79 +6,35 @@ type DiamondMonkDialogProps = {
   onMeditationMinigame: () => void;
 };
 
-// Set video: to a filename (e.g. "b3.mp4") to trigger a video for that question.
-const DIAMOND_QUESTIONS: {
-  question: string;
-  video: string | null;
-  responses: string[];
-}[] = [
-  {
-    question: "What is Diamond Way Buddhism?",
-    video: null,
-    responses: [
-      "Diamond Way is a branch of Kagyu Tibetan Buddhism. The 'diamond' refers to the indestructible nature of the mind — clear, powerful, and unbreakable.",
-      "It was brought to the West by Lama Ole Nydahl in the 1970s. We focus on active, practical methods — meditation, mantras, and direct experience rather than only study.",
-    ],
-  },
-  {
-    question: "What is the Diamondway center here in Trondheim?",
-    video: null,
-    responses: [
-      "We are a small community, but very much alive. People from all walks of life come here — students, workers, families. The door is open to everyone who is curious.",
-      "The Trondheim center is part of a global network of over 600 Diamond Way centers. We hold meditations, teachings, and retreats throughout the year.",
-    ],
-  },
-  {
-    question: "How do you meditate in the Diamond Way tradition?",
-    video: null,
-    responses: [
-      "Our main practice is the 16th Karmapa meditation — we visualize a Buddha form, recite mantra, and rest in the open awareness that follows. It is very powerful.",
-      "We use visualization, mantra, and what we call 'the view' — resting in the nature of mind. It is not about emptying the mind, but recognizing its true quality.",
-    ],
-  },
+const DIAMOND_QUESTIONS = [
+  "What is Diamond Way Buddhism?",
+  "What is the Diamondway center here in Trondheim?",
+  "How do you meditate in the Diamond Way tradition?",
+];
+
+const DIAMOND_VIDEOS = [
+  "/sprites/munk/diamondway1.mp4",
+  "/sprites/munk/diamondway2.mp4",
+  "/sprites/munk/diamondway3.mp4",
 ];
 
 export function DiamondMonkDialog({ onClose, onMeditationMinigame }: DiamondMonkDialogProps) {
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const [response, setResponse] = useState<string | null>(null);
   const [showVideo, setShowVideo] = useState(false);
-  const [videoSrc, setVideoSrc] = useState<string | null>(null);
+  const [videoSrc, setVideoSrc] = useState<string>("");
 
   function handleSelect(index: number) {
-    const q = DIAMOND_QUESTIONS[index];
-    setSelectedIndex(index);
-
-    if (q.video) {
-      setVideoSrc(`/sprites/${q.video}`);
-      setShowVideo(true);
-      muteMusic();
-    } else {
-      const random = Math.floor(Math.random() * q.responses.length);
-      setResponse(q.responses[random]);
-    }
+    setVideoSrc(DIAMOND_VIDEOS[index]);
+    setShowVideo(true);
+    muteMusic();
   }
 
   function handleVideoEnded() {
     setShowVideo(false);
-    setVideoSrc(null);
-    dimMusic();
-    if (selectedIndex !== null) {
-      const q = DIAMOND_QUESTIONS[selectedIndex];
-      const random = Math.floor(Math.random() * q.responses.length);
-      setResponse(q.responses[random]);
-    }
-  }
-
-  function handleBack() {
-    setSelectedIndex(null);
-    setResponse(null);
-    setShowVideo(false);
-    setVideoSrc(null);
     dimMusic();
   }
 
   // ── Video overlay ────────────────────────────────────
-  if (showVideo && videoSrc) {
+  if (showVideo) {
     return (
       <div style={{
         position: "absolute",
@@ -146,32 +102,24 @@ export function DiamondMonkDialog({ onClose, onMeditationMinigame }: DiamondMonk
 
       {/* Body */}
       <div style={{ marginBottom: "16px", fontSize: 10, color: "#ccd8ff", lineHeight: 2.2 }}>
-        {response ? response : "Welcome. What would you like to know about Diamond Way?"}
+        Welcome. What would you like to know about Diamond Way?
       </div>
 
       {/* Questions */}
-      {!response && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {DIAMOND_QUESTIONS.map((q, i) => (
-            <button key={i} onClick={() => handleSelect(i)} style={optionBtn}>
-              › {q.question}
-              {q.video && <span style={{ color: "#88aaff", marginLeft: 8, fontSize: 8 }}>▶ VIDEO</span>}
-            </button>
-          ))}
-          <button onClick={onMeditationMinigame} style={{ ...optionBtn, borderColor: "#55aaff", color: "#55aaff" }}>
-            ☸ Meditate together (+20 karma)
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {DIAMOND_QUESTIONS.map((q, i) => (
+          <button key={i} onClick={() => handleSelect(i)} style={optionBtn}>
+            › {q} <span style={{ color: "#88aaff", marginLeft: 8, fontSize: 8 }}>▶ VIDEO</span>
           </button>
-        </div>
-      )}
+        ))}
+        <button onClick={onMeditationMinigame} style={{ ...optionBtn, borderColor: "#55aaff", color: "#55aaff" }}>
+          ☸ Meditate together (+20 karma)
+        </button>
+      </div>
 
-      {/* Back / Close */}
-      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 16 }}>
-        {response && (
-          <button onClick={handleBack} style={smallBtn}>
-            ← BACK
-          </button>
-        )}
-        <button onClick={onClose} style={{ ...smallBtn, marginLeft: "auto" }}>
+      {/* Close */}
+      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
+        <button onClick={onClose} style={smallBtn}>
           CLOSE ✕
         </button>
       </div>
