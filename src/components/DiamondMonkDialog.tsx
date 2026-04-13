@@ -6,29 +6,55 @@ type DiamondMonkDialogProps = {
   onMeditationMinigame: () => void;
 };
 
-const DIAMOND_QUESTIONS = [
-  "What is Diamond Way Buddhism?",
-  "What is the Diamondway center here in Trondheim?",
-  "How do you meditate in the Diamond Way tradition?",
-];
-
-const DIAMOND_VIDEOS = [
-  "/sprites/munk/diamondway1.mp4",
-  "/sprites/munk/diamondway2.mp4",
-  "/sprites/munk/diamondway3.mp4",
+const DIAMOND_QUESTIONS: {
+  question: string;
+  video: string | null;
+  response: string;
+}[] = [
+  {
+    question: "What is Diamond Way Buddhism?",
+    video: "/sprites/munk/diamondway1.mp4",
+    response: "",
+  },
+  {
+    question: "What is the Diamondway center here in Trondheim?",
+    video: "/sprites/munk/diamondway2.mp4",
+    response: "",
+  },
+  {
+    question: "How do you meditate in the Diamond Way tradition?",
+    video: null,
+    response:
+      "We sit quietly and visualize a Buddha form above us — radiant, peaceful, vast. We recite mantra, let the image dissolve into light, and rest in that open awareness. It is simple, but very powerful. The mind recognizes its own nature.",
+  },
 ];
 
 export function DiamondMonkDialog({ onClose, onMeditationMinigame }: DiamondMonkDialogProps) {
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [response, setResponse] = useState<string | null>(null);
   const [showVideo, setShowVideo] = useState(false);
   const [videoSrc, setVideoSrc] = useState<string>("");
 
   function handleSelect(index: number) {
-    setVideoSrc(DIAMOND_VIDEOS[index]);
-    setShowVideo(true);
-    muteMusic();
+    const q = DIAMOND_QUESTIONS[index];
+    setSelectedIndex(index);
+    if (q.video) {
+      setVideoSrc(q.video);
+      setShowVideo(true);
+      muteMusic();
+    } else {
+      setResponse(q.response);
+    }
   }
 
   function handleVideoEnded() {
+    setShowVideo(false);
+    dimMusic();
+  }
+
+  function handleBack() {
+    setSelectedIndex(null);
+    setResponse(null);
     setShowVideo(false);
     dimMusic();
   }
@@ -102,24 +128,31 @@ export function DiamondMonkDialog({ onClose, onMeditationMinigame }: DiamondMonk
 
       {/* Body */}
       <div style={{ marginBottom: "16px", fontSize: 10, color: "#ccd8ff", lineHeight: 2.2 }}>
-        Welcome. What would you like to know about Diamond Way?
+        {response ? response : "Welcome. What would you like to know about Diamond Way?"}
       </div>
 
       {/* Questions */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {DIAMOND_QUESTIONS.map((q, i) => (
-          <button key={i} onClick={() => handleSelect(i)} style={optionBtn}>
-            › {q}
+      {!response && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {DIAMOND_QUESTIONS.map((q, i) => (
+            <button key={i} onClick={() => handleSelect(i)} style={optionBtn}>
+              › {q.question}
+            </button>
+          ))}
+          <button onClick={onMeditationMinigame} style={{ ...optionBtn, borderColor: "#55aaff", color: "#55aaff" }}>
+            ☸ Meditate together (+20 karma)
           </button>
-        ))}
-        <button onClick={onMeditationMinigame} style={{ ...optionBtn, borderColor: "#55aaff", color: "#55aaff" }}>
-          ☸ Meditate together (+20 karma)
-        </button>
-      </div>
+        </div>
+      )}
 
-      {/* Close */}
-      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
-        <button onClick={onClose} style={smallBtn}>
+      {/* Back / Close */}
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 16 }}>
+        {response && (
+          <button onClick={handleBack} style={smallBtn}>
+            ← BACK
+          </button>
+        )}
+        <button onClick={onClose} style={{ ...smallBtn, marginLeft: "auto" }}>
           CLOSE ✕
         </button>
       </div>

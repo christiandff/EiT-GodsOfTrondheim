@@ -1,6 +1,2 @@
 # Auto detect text files and perform LF normalization
 * text=auto
-public/sprites/munk/munken1.mp4 filter=lfs diff=lfs merge=lfs -text
-public/sprites/munk/munken.mp4 filter=lfs diff=lfs merge=lfs -text
-public/sprites/munk/diamondway3.mp4 filter=lfs diff=lfs merge=lfs -text
-public/sprites/munk/diamondway.mp4 filter=lfs diff=lfs merge=lfs -text

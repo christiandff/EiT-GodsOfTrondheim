@@ -6,29 +6,55 @@ type MonkDialogProps = {
   onTeaMinigame: () => void;
 };
 
-const MONK_QUESTIONS = [
-  "What is karma?",
-  "What is the goal of Buddhism?",
-  "How can you reach nirvana and complete happiness?",
-];
-
-const MONK_VIDEOS = [
-  "/sprites/munk/munken1.mp4",
-  "/sprites/munk/munken2.mp4",
-  "/sprites/munk/munken3.mp4",
+const MONK_QUESTIONS: {
+  question: string;
+  video: string | null;
+  response: string;
+}[] = [
+  {
+    question: "What is karma?",
+    video: null,
+    response:
+      "Karma is the law of cause and effect. Every action — kind or harmful — creates a ripple that shapes your future. It is not fate or punishment. It is the echo of your own choices returning to you.",
+  },
+  {
+    question: "What is the goal of Buddhism?",
+    video: "/sprites/munk/munken2.mp4",
+    response: "",
+  },
+  {
+    question: "How can you reach nirvana and complete happiness?",
+    video: "/sprites/munk/munken3.mp4",
+    response: "",
+  },
 ];
 
 export function MonkDialog({ onClose, onTeaMinigame }: MonkDialogProps) {
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [response, setResponse] = useState<string | null>(null);
   const [showVideo, setShowVideo] = useState(false);
   const [videoSrc, setVideoSrc] = useState<string>("");
 
   function handleSelect(index: number) {
-    setVideoSrc(MONK_VIDEOS[index]);
-    setShowVideo(true);
-    muteMusic();
+    const q = MONK_QUESTIONS[index];
+    setSelectedIndex(index);
+    if (q.video) {
+      setVideoSrc(q.video);
+      setShowVideo(true);
+      muteMusic();
+    } else {
+      setResponse(q.response);
+    }
   }
 
   function handleVideoEnded() {
+    setShowVideo(false);
+    dimMusic();
+  }
+
+  function handleBack() {
+    setSelectedIndex(null);
+    setResponse(null);
     setShowVideo(false);
     dimMusic();
   }
@@ -102,24 +128,31 @@ export function MonkDialog({ onClose, onTeaMinigame }: MonkDialogProps) {
 
       {/* Body */}
       <div style={{ marginBottom: "16px", fontSize: 10, color: "#ffe8bb", lineHeight: 2.2 }}>
-        Ask me what you wish to know, traveller.
+        {response ? response : "Ask me what you wish to know, traveller."}
       </div>
 
       {/* Questions */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {MONK_QUESTIONS.map((q, i) => (
-          <button key={i} onClick={() => handleSelect(i)} style={optionBtn}>
-            › {q}
+      {!response && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {MONK_QUESTIONS.map((q, i) => (
+            <button key={i} onClick={() => handleSelect(i)} style={optionBtn}>
+              › {q.question}
+            </button>
+          ))}
+          <button onClick={onTeaMinigame} style={{ ...optionBtn, borderColor: "#88cc88", color: "#88cc88" }}>
+            🍵 Share a cup of tea (+20 karma)
           </button>
-        ))}
-        <button onClick={onTeaMinigame} style={{ ...optionBtn, borderColor: "#88cc88", color: "#88cc88" }}>
-          🍵 Share a cup of tea (+20 karma)
-        </button>
-      </div>
+        </div>
+      )}
 
-      {/* Close */}
-      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
-        <button onClick={onClose} style={smallBtn}>
+      {/* Back / Close */}
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 16 }}>
+        {response && (
+          <button onClick={handleBack} style={smallBtn}>
+            ← BACK
+          </button>
+        )}
+        <button onClick={onClose} style={{ ...smallBtn, marginLeft: "auto" }}>
           CLOSE ✕
         </button>
       </div>
