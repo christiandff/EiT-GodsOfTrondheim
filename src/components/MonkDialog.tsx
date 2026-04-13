@@ -7,9 +7,9 @@ type MonkDialogProps = {
 };
 
 const MONK_QUESTIONS = [
-  "What is the essence of Buddhism?",
-  "How do you practice Buddhism here in Trondheim?",
-  "What happens when we die? Is rebirth real?",
+  "What is karma?",
+  "What is the goal of Buddhism?",
+  "How can you reach nirvana and complete happiness?",
 ];
 
 const MONK_VIDEOS = [
@@ -109,7 +109,7 @@ export function MonkDialog({ onClose, onTeaMinigame }: MonkDialogProps) {
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {MONK_QUESTIONS.map((q, i) => (
           <button key={i} onClick={() => handleSelect(i)} style={optionBtn}>
-            › {q} <span style={{ color: "#ffcc66", marginLeft: 8, fontSize: 8 }}>▶ VIDEO</span>
+            › {q}
           </button>
         ))}
         <button onClick={onTeaMinigame} style={{ ...optionBtn, borderColor: "#88cc88", color: "#88cc88" }}>

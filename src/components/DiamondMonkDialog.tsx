@@ -109,7 +109,7 @@ export function DiamondMonkDialog({ onClose, onMeditationMinigame }: DiamondMonk
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {DIAMOND_QUESTIONS.map((q, i) => (
           <button key={i} onClick={() => handleSelect(i)} style={optionBtn}>
-            › {q} <span style={{ color: "#88aaff", marginLeft: 8, fontSize: 8 }}>▶ VIDEO</span>
+            › {q}
           </button>
         ))}
         <button onClick={onMeditationMinigame} style={{ ...optionBtn, borderColor: "#55aaff", color: "#55aaff" }}>
