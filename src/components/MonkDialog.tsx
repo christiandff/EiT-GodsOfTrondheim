@@ -33,11 +33,6 @@ export function MonkDialog({ onClose, onTeaMinigame }: MonkDialogProps) {
     dimMusic();
   }
 
-  function handleBack() {
-    setShowVideo(false);
-    dimMusic();
-  }
-
   // ── Video overlay ────────────────────────────────────
   if (showVideo) {
     return (
