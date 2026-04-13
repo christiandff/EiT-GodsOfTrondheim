@@ -30,14 +30,12 @@ const MONK_QUESTIONS: {
 ];
 
 export function MonkDialog({ onClose, onTeaMinigame }: MonkDialogProps) {
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [response, setResponse] = useState<string | null>(null);
   const [showVideo, setShowVideo] = useState(false);
   const [videoSrc, setVideoSrc] = useState<string>("");
 
   function handleSelect(index: number) {
     const q = MONK_QUESTIONS[index];
-    setSelectedIndex(index);
     if (q.video) {
       setVideoSrc(q.video);
       setShowVideo(true);
@@ -53,7 +51,6 @@ export function MonkDialog({ onClose, onTeaMinigame }: MonkDialogProps) {
   }
 
   function handleBack() {
-    setSelectedIndex(null);
     setResponse(null);
     setShowVideo(false);
     dimMusic();

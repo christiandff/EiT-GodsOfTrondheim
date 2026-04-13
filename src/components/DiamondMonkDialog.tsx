@@ -30,14 +30,12 @@ const DIAMOND_QUESTIONS: {
 ];
 
 export function DiamondMonkDialog({ onClose, onMeditationMinigame }: DiamondMonkDialogProps) {
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [response, setResponse] = useState<string | null>(null);
   const [showVideo, setShowVideo] = useState(false);
   const [videoSrc, setVideoSrc] = useState<string>("");
 
   function handleSelect(index: number) {
     const q = DIAMOND_QUESTIONS[index];
-    setSelectedIndex(index);
     if (q.video) {
       setVideoSrc(q.video);
       setShowVideo(true);
@@ -53,7 +51,6 @@ export function DiamondMonkDialog({ onClose, onMeditationMinigame }: DiamondMonk
   }
 
   function handleBack() {
-    setSelectedIndex(null);
     setResponse(null);
     setShowVideo(false);
     dimMusic();
