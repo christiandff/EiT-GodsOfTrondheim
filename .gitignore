@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Large video files (over 100MB, cannot be stored in git)
+public/sprites/munk/munken.mp4
+public/sprites/munk/munken1.mp4
+public/sprites/munk/diamondway.mp4
+public/sprites/munk/diamondway3.mp4
