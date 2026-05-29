@@ -35,7 +35,7 @@ const INVINCIBLE_MS = 1200;
 const DIALOG_LINES = [
   { speaker: "MARA", text: "So... you think you have earned Nirvana? How amusing." },
   { speaker: "MARA", text: "I have tempted kings and sages. You are nothing but a wanderer with a karma bar." },
-  { speaker: "MARA", text: "Face me — and we shall see if your enlightenment is real." },
+  { speaker: "MARA", text: "Face me, and we shall see if your enlightenment is real." },
   { speaker: "YOU",  text: "I have walked through Trondheim, spoken with monks, and poured tea with patience." },
   { speaker: "YOU",  text: "I am ready. Come." },
 ];

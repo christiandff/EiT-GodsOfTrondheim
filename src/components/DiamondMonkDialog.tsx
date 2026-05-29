@@ -1,89 +1,35 @@
 import { useState } from "react";
-import { dimMusic, muteMusic } from "../bgMusic";
 
 type DiamondMonkDialogProps = {
   onClose: () => void;
   onMeditationMinigame: () => void;
 };
 
-const DIAMOND_QUESTIONS: {
-  question: string;
-  video: string | null;
-  response: string;
-}[] = [
+const DIAMOND_QUESTIONS: { question: string; response: string }[] = [
   {
     question: "What is Diamond Way Buddhism?",
-    video: "/sprites/munk/diamondway1.mp4",
-    response: "",
+    response: "The diamond way is a more western and new version of buddhism founded by our monk Ole",
   },
   {
     question: "What is the Diamondway center here in Trondheim?",
-    video: "/sprites/munk/diamondway2.mp4",
-    response: "",
+    response: "Its a meeting place, where all people can come togheter and meditate, and socialise",
   },
   {
     question: "How do you meditate in the Diamond Way tradition?",
-    video: null,
     response:
-      "We sit quietly and visualize a Buddha form above us — radiant, peaceful, vast. We recite mantra, let the image dissolve into light, and rest in that open awareness. It is simple, but very powerful. The mind recognizes its own nature.",
+      "We sit quietly and visualize a Buddha form above us, radiant, peaceful, vast. We recite mantra, let the image dissolve into light, and rest in that open awareness. It is simple, but very powerful. The mind recognizes its own nature.",
   },
 ];
 
 export function DiamondMonkDialog({ onClose, onMeditationMinigame }: DiamondMonkDialogProps) {
   const [response, setResponse] = useState<string | null>(null);
-  const [showVideo, setShowVideo] = useState(false);
-  const [videoSrc, setVideoSrc] = useState<string>("");
 
   function handleSelect(index: number) {
-    const q = DIAMOND_QUESTIONS[index];
-    if (q.video) {
-      setVideoSrc(q.video);
-      setShowVideo(true);
-      muteMusic();
-    } else {
-      setResponse(q.response);
-    }
-  }
-
-  function handleVideoEnded() {
-    setShowVideo(false);
-    dimMusic();
+    setResponse(DIAMOND_QUESTIONS[index].response);
   }
 
   function handleBack() {
     setResponse(null);
-    setShowVideo(false);
-    dimMusic();
-  }
-
-  // ── Video overlay ────────────────────────────────────
-  if (showVideo) {
-    return (
-      <div style={{
-        position: "absolute",
-        inset: 0,
-        zIndex: 20,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "rgba(0,0,0,0.92)",
-      }}>
-        <video
-          src={videoSrc}
-          autoPlay
-          onEnded={handleVideoEnded}
-          style={{
-            maxWidth: "80vw",
-            maxHeight: "80vh",
-            border: "3px solid #2244aa",
-            boxShadow: "8px 8px 0 #000",
-          }}
-        />
-        <button onClick={handleVideoEnded} style={skipBtn}>
-          SKIP ▶▶
-        </button>
-      </div>
-    );
   }
 
   // ── Dialog ───────────────────────────────────────────
@@ -183,16 +129,3 @@ const smallBtn: React.CSSProperties = {
   letterSpacing: 1,
 };
 
-const skipBtn: React.CSSProperties = {
-  position: "absolute",
-  bottom: "10%",
-  right: "12%",
-  fontFamily: "'Press Start 2P', monospace",
-  fontSize: 9,
-  color: "#7799bb",
-  background: "#0d1a2e",
-  border: "1px solid #334466",
-  padding: "8px 16px",
-  cursor: "pointer",
-  letterSpacing: 1,
-};

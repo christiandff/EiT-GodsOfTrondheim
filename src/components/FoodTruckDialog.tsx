@@ -1,70 +1,33 @@
 import { useState } from "react";
-import { dimMusic, muteMusic } from "../bgMusic";
 
 type FoodTruckDialogProps = {
   onClose: () => void;
 };
 
-const QUESTIONS = [
-  "What do you associate with the word Buddhism?",
-  "What do you think buddhists are like?",
-  "Who was Buddha?",
-];
-
-const VIDEOS = [
-  "/sprites/burgerman1.mp4",
-  "/sprites/burgerman2.mp4",
-  "/sprites/burgerman3.mp4",
+const QUESTIONS: { question: string; response: string }[] = [
+  {
+    question: "What do you associate with the word Buddhism?",
+    response: "Monks, I guess? Shaved heads, orange robes. Maybe temples. I don't know much about it honestly.",
+  },
+  {
+    question: "What do you think buddhists are like?",
+    response: "Pretty calm people from what I've seen. That monk over there never seems stressed. Must be nice.",
+  },
+  {
+    question: "Who was Buddha?",
+    response: "Some wise guy from ancient India? Sat under a tree and figured life out. That's about all I know.",
+  },
 ];
 
 export function FoodTruckDialog({ onClose }: FoodTruckDialogProps) {
-  const [showVideo, setShowVideo] = useState(false);
   const [response, setResponse] = useState<string | null>(null);
-  const [videoSrc, setVideoSrc] = useState<string>("");
 
   function handleSelect(index: number) {
-    setResponse(QUESTIONS[index]);
-    setVideoSrc(VIDEOS[index]);
-    setShowVideo(true);
-    muteMusic();
-  }
-
-  function handleVideoEnded() {
-    setShowVideo(false);
-    setResponse(null);
-    dimMusic();
+    setResponse(QUESTIONS[index].response);
   }
 
   function handleBack() {
     setResponse(null);
-    setShowVideo(false);
-    dimMusic();
-  }
-
-  // ── Video overlay ──────────────────────────────────────
-  if (showVideo) {
-    return (
-      <div style={{
-        position: "absolute", inset: 0, zIndex: 20,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        background: "rgba(0,0,0,0.92)",
-      }}>
-        <video
-          src={videoSrc}
-          autoPlay
-          onEnded={handleVideoEnded}
-          style={{
-            maxWidth: "80vw",
-            maxHeight: "80vh",
-            border: "3px solid #886633",
-            boxShadow: "8px 8px 0 #000",
-          }}
-        />
-        <button onClick={handleVideoEnded} style={skipBtn}>
-          SKIP ▶▶
-        </button>
-      </div>
-    );
   }
 
   // ── Dialog ───────────────────────────────────────────
@@ -86,7 +49,7 @@ export function FoodTruckDialog({ onClose }: FoodTruckDialogProps) {
 
       {/* Body */}
       <div style={{ marginBottom: 16, fontSize: 10, color: "#ffe8bb", lineHeight: 2.2 }}>
-        {response ? "" : "Yeah? What do you want?"}
+        {response ? response : "Yeah? What do you want?"}
       </div>
 
       {/* Questions */}
@@ -94,7 +57,7 @@ export function FoodTruckDialog({ onClose }: FoodTruckDialogProps) {
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {QUESTIONS.map((q, i) => (
             <button key={i} onClick={() => handleSelect(i)} style={optionBtn}>
-              › {q}
+              › {q.question}
             </button>
           ))}
         </div>
@@ -126,9 +89,3 @@ const smallBtn: React.CSSProperties = {
   fontFamily: "'Press Start 2P', monospace", fontSize: 8, letterSpacing: 1,
 };
 
-const skipBtn: React.CSSProperties = {
-  position: "absolute", bottom: "10%", right: "12%",
-  fontFamily: "'Press Start 2P', monospace", fontSize: 9,
-  color: "#7799bb", background: "#0d1a2e", border: "1px solid #334466",
-  padding: "8px 16px", cursor: "pointer", letterSpacing: 1,
-};

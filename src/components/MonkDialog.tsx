@@ -1,89 +1,35 @@
 import { useState } from "react";
-import { dimMusic, muteMusic } from "../bgMusic";
 
 type MonkDialogProps = {
   onClose: () => void;
   onTeaMinigame: () => void;
 };
 
-const MONK_QUESTIONS: {
-  question: string;
-  video: string | null;
-  response: string;
-}[] = [
+const MONK_QUESTIONS: { question: string; response: string }[] = [
   {
     question: "What is karma?",
-    video: null,
     response:
-      "Karma is the law of cause and effect. Every action — kind or harmful — creates a ripple that shapes your future. It is not fate or punishment. It is the echo of your own choices returning to you.",
+      "Karma is the law of cause and effect. Every action, kind or harmful, creates a ripple that shapes your future. It is not fate or punishment. It is the echo of your own choices returning to you.",
   },
   {
     question: "What is the goal of Buddhism?",
-    video: "/sprites/munk/munken2.mp4",
-    response: "",
+    response: "The goal of Buddhism is to live a good meaningfull life, where you help others and live under the principal of karma",
   },
   {
     question: "How can you reach nirvana and complete happiness?",
-    video: "/sprites/munk/munken3.mp4",
-    response: "",
+    response: "You reach nivana by living as a good buddhist, medite and follow the principales of buddhism",
   },
 ];
 
 export function MonkDialog({ onClose, onTeaMinigame }: MonkDialogProps) {
   const [response, setResponse] = useState<string | null>(null);
-  const [showVideo, setShowVideo] = useState(false);
-  const [videoSrc, setVideoSrc] = useState<string>("");
 
   function handleSelect(index: number) {
-    const q = MONK_QUESTIONS[index];
-    if (q.video) {
-      setVideoSrc(q.video);
-      setShowVideo(true);
-      muteMusic();
-    } else {
-      setResponse(q.response);
-    }
-  }
-
-  function handleVideoEnded() {
-    setShowVideo(false);
-    dimMusic();
+    setResponse(MONK_QUESTIONS[index].response);
   }
 
   function handleBack() {
     setResponse(null);
-    setShowVideo(false);
-    dimMusic();
-  }
-
-  // ── Video overlay ────────────────────────────────────
-  if (showVideo) {
-    return (
-      <div style={{
-        position: "absolute",
-        inset: 0,
-        zIndex: 20,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "rgba(0,0,0,0.92)",
-      }}>
-        <video
-          src={videoSrc}
-          autoPlay
-          onEnded={handleVideoEnded}
-          style={{
-            maxWidth: "80vw",
-            maxHeight: "80vh",
-            border: "3px solid #886633",
-            boxShadow: "8px 8px 0 #000",
-          }}
-        />
-        <button onClick={handleVideoEnded} style={skipBtn}>
-          SKIP ▶▶
-        </button>
-      </div>
-    );
   }
 
   // ── Dialog ───────────────────────────────────────────
@@ -183,16 +129,3 @@ const smallBtn: React.CSSProperties = {
   letterSpacing: 1,
 };
 
-const skipBtn: React.CSSProperties = {
-  position: "absolute",
-  bottom: "10%",
-  right: "12%",
-  fontFamily: "'Press Start 2P', monospace",
-  fontSize: 9,
-  color: "#7799bb",
-  background: "#0d1a2e",
-  border: "1px solid #334466",
-  padding: "8px 16px",
-  cursor: "pointer",
-  letterSpacing: 1,
-};

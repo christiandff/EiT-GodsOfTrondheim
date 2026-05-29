@@ -10,21 +10,21 @@ const QUESTIONS = [
     question: "What do you know about Buddhism?",
     responses: [
       "The Buddha taught that suffering arises from attachment. In a city like this, with so much to want — that teaching feels very relevant.",
-      "At its heart, Buddhism is about waking up. Not metaphorically — actually seeing reality clearly, without the fog of craving and aversion.",
+      "At its heart, Buddhism is about waking up. Not metaphorically, actually seeing reality clearly, without the fog of craving and aversion.",
     ]
   },
   {
     question: "How do you think Buddhism fits in Norway?",
     responses: [
       "Interestingly well. Norwegians value stillness, nature, and inward reflection. The Buddhist path does not clash with that — it deepens it.",
-      "There is a long tradition of Buddhist communities here. People from all walks of life find something in it — whether they call themselves Buddhist or not.",
+      "There is a long tradition of Buddhist communities here. People from all walks of life find something in it, whether they call themselves Buddhist or not.",
     ]
   },
   {
     question: "What is the hardest part of the Buddhist path?",
     responses: [
-      "Consistency. Sitting still once brings peace. Sitting still every day, for years — that is where transformation happens.",
-      "Letting go of the idea that you are a fixed self. The Buddha called this anatta — no-self. Most people find that terrifying at first.",
+      "Consistency. Sitting still once brings peace. Sitting still every day, for years, that is where transformation happens.",
+      "Letting go of the idea that you are a fixed self. The Buddha called this anatta, no-self. Most people find that terrifying at first.",
     ]
   }
 ];
